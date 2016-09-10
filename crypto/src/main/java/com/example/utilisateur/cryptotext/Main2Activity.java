@@ -5,10 +5,12 @@ import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+/**
+ * @author DonatienTERTRAIS
+ */
 public class Main2Activity extends AppCompatActivity {
 
     @Override
@@ -17,7 +19,7 @@ public class Main2Activity extends AppCompatActivity {
         setContentView(R.layout.activity_main2);
     }
 
-    public void sendMessage(){
+    public void sendMessage(View view){
         EditText txtphoneNo = (EditText) findViewById(R.id.phoneNumber);
         EditText txtMessage = (EditText) findViewById(R.id.message);
 
@@ -27,6 +29,7 @@ public class Main2Activity extends AppCompatActivity {
 
         try {
             SmsManager smsManager = SmsManager.getDefault();
+            //TODO encrypting / decrypting
             smsManager.sendTextMessage(phoneNo, null, message, null, null);
             Toast.makeText(getApplicationContext(), "SMS sent.", Toast.LENGTH_LONG).show();
         } catch (Exception e) {
