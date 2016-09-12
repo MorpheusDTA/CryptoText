@@ -5,7 +5,9 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
+import android.provider.ContactsContract;
 import android.telephony.SmsMessage;
 import android.widget.Toast;
 import android.provider.Telephony.Sms.Intents;
@@ -27,12 +29,10 @@ public class SmsReceiver extends BroadcastReceiver {
     public static final byte[] PASSWORD = new byte[]{ 0x20, 0x32, 0x34, 0x47, (byte) 0x84, 0x33, 0x58 };
 
     public void onReceive( Context context, Intent intent ) {
-
         String messages = "";
 
         SmsMessage[] msgs = Intents.getMessagesFromIntent(intent);
         if ( msgs.length != 0) {
-
             // Get ContentResolver object for pushing SMS to the incoming folder
             ContentResolver contentResolver = context.getContentResolver();
 
@@ -42,8 +42,14 @@ public class SmsReceiver extends BroadcastReceiver {
                 String body = sms.getMessageBody().toString();
                 String address = sms.getOriginatingAddress();
 
+                //Resolving the contact name from the contacts.
+                Uri lookupUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(address));
+                Cursor c = contentResolver.query(lookupUri, new String[]{ContactsContract.Data.DISPLAY_NAME}, null, null, null);
+                if (c != null && c.moveToFirst()) {
+                    address = c.getString(c.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+                }
+                c.close();
                 messages += "SMS from " + address + " :\n";
-                messages += body + "\n";
 
                 putSmsToDatabase( contentResolver, sms );
             }
@@ -54,12 +60,14 @@ public class SmsReceiver extends BroadcastReceiver {
         // this.abortBroadcast();
     }
 
-    private void putSmsToDatabase( ContentResolver contentResolver, SmsMessage sms )
-    {
+    private void putSmsToDatabase( ContentResolver contentResolver, SmsMessage sms ) {
+
+        //Resolving the contact name from the contacts.
+
         // Create SMS row
         ContentValues values = new ContentValues();
         values.put( "Address", sms.getOriginatingAddress() );
-        values.put( "Dat", sms.getTimestampMillis() );
+        values.put( "Date", sms.getTimestampMillis() );
         values.put( "Read", MESSAGE_IS_NOT_READ );
         values.put( "Status", sms.getStatus() );
         values.put( "Type", MESSAGE_TYPE_INBOX );

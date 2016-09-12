@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Menu;
@@ -14,7 +15,6 @@ import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ import java.util.ArrayList;
  * @author DonatienTERTRAIS
  */
 public class MainActivity extends AppCompatActivity implements OnItemClickListener, OnItemLongClickListener {
-    ArrayList<String> smsList = new ArrayList<String>();
+    protected ArrayList<String> conversationList = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,8 +31,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         setContentView(R.layout.activity_main);
     }
 
-    public void onFabClick(View view){
-        Intent intent = new Intent(this, Main2Activity.class);
+    public void newConversation(View view){
+        Intent intent = new Intent(this, CreateConversationActivity.class);
+        intent.putExtra("conversationList", conversationList);
         startActivity(intent);
     }
 
@@ -51,46 +52,65 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
+        if (id == R.id.action_settings) return true;
         return super.onOptionsItemSelected(item);
     }
 
     public void update( View v ) {
+        ArrayList<String> conv = new ArrayList<>();
         ContentResolver contentResolver = getContentResolver();
-        Cursor cursor = contentResolver.query( Uri.parse("content://sms/inbox"), null, null, null, null);
-        int indexBody = cursor.getColumnIndex( "Body" );
-        int indexAddr = cursor.getColumnIndex( "Address" );
+        Cursor cursor = contentResolver.query(Uri.parse("content://sms/inbox"), null, null, null, null);
+        int indexAddr = cursor.getColumnIndex("Address");
 
-        if ( indexBody < 0 || !cursor.moveToFirst() ) return;
+        if ( cursor.getColumnIndex( "Body" ) < 0 || !cursor.moveToFirst() ) return;
 
-        smsList.clear();
+        conversationList.clear();
 
-        do {
-            String str = "Sender: " + cursor.getString( indexAddr ) + "\n" + cursor.getString( indexBody );
-            smsList.add( str );
-        }
-        while( cursor.moveToNext() );
+        /*Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(cursor.getLong(indexDate));
+
+        int date = calendar.get(Calendar.DATE);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);*/
+
+        String str = "Conversation: " + getContactName(cursor.getString( indexAddr ), contentResolver) + "\n" + cursor.getString(indexAddr) /*+ "\n" + date + " " + hour*/;
+        conv.add( cursor.getString(indexAddr));
+        conversationList.add(str);
+
+        while( cursor.moveToNext() ){
+            if ( !conv.contains(cursor.getString( indexAddr )) ) {
+                str = "Conversation: " + getContactName(cursor.getString( indexAddr ), contentResolver) + "\n" + cursor.getString(indexAddr)/*+ "\n" + cursor.getString( indexDate )*/;
+                conv.add(cursor.getString(indexAddr));
+                conversationList.add(str);
+            }
+        };
 
         ListView smsListView = (ListView) findViewById( R.id.listView );
-        smsListView.setAdapter( new ArrayAdapter<String>( this, android.R.layout.simple_list_item_1, smsList) );
+        smsListView.setAdapter( new ArrayAdapter<String>( this, android.R.layout.simple_list_item_1, conversationList) );
         smsListView.setOnItemClickListener(this);
         smsListView.setOnItemLongClickListener(this);
+    }
+
+    public String getContactName(String phoneNumber, ContentResolver cr){
+        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+        Cursor cursor = cr.query(uri, new String[]{ContactsContract.Data.DISPLAY_NAME}, null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+        }
+        cursor.close();
+        return phoneNumber;
     }
     //The SMS text is obtained from the list, decrypted and then shown. SmsReceiver.PASSWORD can be changed in any way. The list item listener is as follows:
 
     public void onItemClick( AdapterView<?> parent, View view, int pos, long id ) {
-        try {
-            String sender = smsList.get( pos ).split("\n")[0];
-            String encryptedData = smsList.get( pos ).split("\n")[1];
-            String data = sender + "\n" + Encryption.decrypt( new String(SmsReceiver.PASSWORD), encryptedData );
-            Toast.makeText(this, data, Toast.LENGTH_SHORT).show();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        String phoneNumber = conversationList.get(pos).split("\n")[1];
+        String contact = conversationList.get(pos).split(" ")[1];
+
+        Intent intent = new Intent(this, Conversation.class);
+        intent.putExtra("phoneNumber", phoneNumber);
+        intent.putExtra("contactName", contact);
+        startActivity(intent);
     }
 
     public boolean onItemLongClick( AdapterView<?> parent, View view, int pos, long id ) {
@@ -100,8 +120,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         alert.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                /*ContentResolver cttresolver = getContentResolver();
-                cttresolver.*/
+                // TODO delete the conversation
                 dialog.dismiss();
             }
         });
