@@ -17,9 +17,11 @@
         android:ems="10"
         android:id="@+id/phone"
         android:hint="Phone Number"
+        android:layout_marginTop="37dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="55dp" />
+        android:enabled="true"
+        android:editable="false" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -28,10 +30,10 @@
         android:ems="10"
         android:id="@+id/emissionkey"
         android:hint="16 Characters Emission Key"
-        android:layout_below="@+id/phone"
+        android:layout_centerVertical="true"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="90dp"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:enabled="true" />
 
     <Button
         android:layout_width="wrap_content"
@@ -47,11 +49,23 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Large Text"
         android:id="@+id/error"
         android:layout_below="@+id/emissionkey"
         android:layout_marginTop="34dp"
         android:layout_alignParentStart="true"
-        android:layout_alignEnd="@+id/emissionkey" />
+        android:layout_alignParentEnd="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPassword"
+        android:ems="10"
+        android:id="@+id/keyStorePassword"
+        android:layout_below="@+id/phone"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="50dp"
+        android:layout_alignEnd="@+id/emissionkey"
+        android:hint="Key Store File Password"
+        android:enabled="true" />
 
 </RelativeLayout>

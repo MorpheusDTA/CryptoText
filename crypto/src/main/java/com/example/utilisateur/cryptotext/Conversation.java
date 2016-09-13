@@ -27,7 +27,7 @@ public class Conversation extends AppCompatActivity {
         });
 
         String phoneNumber = "";
-        String contactName = "";
+        String contactName = "Unknown";
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if(extras != null) {

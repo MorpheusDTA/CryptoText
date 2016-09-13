@@ -4,9 +4,12 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.PhoneNumberUtils;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -34,12 +37,23 @@ public class CreateConversationActivity extends AppCompatActivity {
         }
     }
 
-    protected void createConversation(View view){
+    public void createConversation(View view){
         EditText phone = (EditText) findViewById(R.id.phone);
         EditText emissionKey = (EditText) findViewById(R.id.emissionkey);
+        EditText keyStore = (EditText) findViewById(R.id.keyStorePassword);
         String phoneNumber = phone.getText().toString();
         String key = emissionKey.getText().toString();
-        if ((key.length() == 16 || key.length() == 0) && phoneNumber.length() >= 10){
+        String keyStorePassword = keyStore.getText().toString();
+
+        TelephonyManager tm = (TelephonyManager) getSystemService(this.TELEPHONY_SERVICE);
+        if (Build.VERSION.SDK_INT >= 21) {
+            phoneNumber = PhoneNumberUtils.formatNumber(phoneNumber, tm.getSimCountryIso());
+        } else {
+            phoneNumber = PhoneNumberUtils.formatNumber(phoneNumber);
+        }
+        phone.setText(phoneNumber);
+
+        /*if ((key.length() == 16 || key.length() == 0) && phoneNumber.length() >= 10){
             String contactName = "";
             // TODO store the key, check if the number is already in a conversation
             Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
@@ -55,10 +69,10 @@ public class CreateConversationActivity extends AppCompatActivity {
             intent.putExtra("contactName", contactName);
             startActivity(intent);
         } else if (key.length() != 16) { // Error on the phoneNumber or the key
-            displayError(0);
+            emissionkey.setError("The key must be 16 char long");
         } else {
-            displayError(1);
-        }
+            phone.setError("Please check the phone is correct");
+        }*/
 
 
 
