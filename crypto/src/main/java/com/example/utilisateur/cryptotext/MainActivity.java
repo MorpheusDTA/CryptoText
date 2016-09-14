@@ -104,8 +104,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     //The SMS text is obtained from the list, decrypted and then shown. SmsReceiver.PASSWORD can be changed in any way. The list item listener is as follows:
 
     public void onItemClick( AdapterView<?> parent, View view, int pos, long id ) {
-        String phoneNumber = conversationList.get(pos).split("\n")[1];
-        String contact = conversationList.get(pos).split(" ")[1];
+        String[] infos = conversationList.get(pos).split("\n");
+        String phoneNumber = infos[1];
+        String contact = infos[0].substring(infos[0].indexOf(" ") + 1);
 
         Intent intent = new Intent(this, Conversation.class);
         intent.putExtra("phoneNumber", phoneNumber);

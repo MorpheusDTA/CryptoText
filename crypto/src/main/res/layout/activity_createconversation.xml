@@ -29,7 +29,7 @@
         android:inputType="textPassword"
         android:ems="10"
         android:id="@+id/emissionkey"
-        android:hint="16 Characters Emission Key"
+        android:hint="Emission Key Seed"
         android:layout_centerVertical="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
