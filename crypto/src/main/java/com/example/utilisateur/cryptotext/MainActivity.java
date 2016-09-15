@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     }
 
     public void newConversation(View view){
-        Intent intent = new Intent(this, ModifyConversationActivity.class);
+        Intent intent = new Intent(this, CreateConversationActivity.class);
         intent.putExtra("conversationList", conversationList);
         startActivity(intent);
     }
@@ -65,9 +65,19 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         if ( cursor.getColumnIndex( "Body" ) < 0 || !cursor.moveToFirst() ) return;
 
         conversationList.clear();
+
+        /*Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(cursor.getLong(indexDate));
+
+        int date = calendar.get(Calendar.DATE);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);*/
+
         String str = "Conversation: " + getContactName(cursor.getString( indexAddr ), contentResolver) + "\n" + cursor.getString(indexAddr) /*+ "\n" + date + " " + hour*/;
         conv.add( cursor.getString(indexAddr));
         conversationList.add(str);
+
         while( cursor.moveToNext() ){
             if ( !conv.contains(cursor.getString( indexAddr )) ) {
                 str = "Conversation: " + getContactName(cursor.getString( indexAddr ), contentResolver) + "\n" + cursor.getString(indexAddr)/*+ "\n" + cursor.getString( indexDate )*/;
@@ -95,15 +105,18 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
     public void onItemClick( AdapterView<?> parent, View view, int pos, long id ) {
         String phoneNumber = conversationList.get(pos).split("\n")[1];
-        Intent intent = new Intent(this, ModifyConversationActivity.class);
+        String contact = conversationList.get(pos).split(" ")[1];
+
+        Intent intent = new Intent(this, Conversation.class);
         intent.putExtra("phoneNumber", phoneNumber);
+        intent.putExtra("contactName", contact);
         startActivity(intent);
     }
 
     public boolean onItemLongClick( AdapterView<?> parent, View view, int pos, long id ) {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle("Alert!!");
-        alert.setMessage("Are you sure to delete the conversation ?");
+        alert.setMessage("Are you sure to delete record: to be done");
         alert.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
