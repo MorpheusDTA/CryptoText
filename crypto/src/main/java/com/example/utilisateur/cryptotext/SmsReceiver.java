@@ -25,6 +25,7 @@ public class SmsReceiver extends BroadcastReceiver {
     public static final int MESSAGE_IS_NOT_SEEN = 0;
     public static final int MESSAGE_IS_SEEN = 1;
 
+
     // Change the password here or give a user possibility to change it
     public static final byte[] PASSWORD = new byte[]{ 0x20, 0x32, 0x34, 0x47, (byte) 0x84, 0x33, 0x58 };
 
