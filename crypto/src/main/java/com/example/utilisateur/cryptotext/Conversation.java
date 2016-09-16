@@ -35,10 +35,10 @@ public class Conversation extends AppCompatActivity {
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if(extras != null) {
-                phoneNumber = extras.getString("phoneNumber");
+                phoneNumber = extras.getString(MainActivity.PHONE);
             }
         } else {
-            phoneNumber = (String) savedInstanceState.getSerializable("phoneNumber");
+            phoneNumber = (String) savedInstanceState.getSerializable(MainActivity.PHONE);
         }
 
         String contactName = "Unknown";

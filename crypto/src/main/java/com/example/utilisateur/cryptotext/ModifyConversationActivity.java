@@ -10,10 +10,6 @@ import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.EditText;
-//import com.google.i18n.phonenumbers.PhoneNumberUtil;
-
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,7 +17,6 @@ import java.util.logging.Logger;
  * @author DonatienTERTRAIS
  */
 public class ModifyConversationActivity extends AppCompatActivity {
-    private String phoneN;
     private static final Level level = Level.WARNING;
     private static Logger logger = Logger.getLogger(Encryption.class.getName());
     private EditText phone = (EditText) findViewById(R.id.phone);
@@ -31,18 +26,19 @@ public class ModifyConversationActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        String phoneN = null;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_modifyconversation);
 
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if(extras != null) {
-                phoneN = (String) extras.get("phoneNumber");
+                phoneN = extras.getString(MainActivity.PHONE);
             }
         } else {
-            phoneN = (String) savedInstanceState.getSerializable("phoneNumber");
+            phoneN = (String) savedInstanceState.getSerializable(MainActivity.PHONE);
         }
-        if (phoneN.length() != 0) {
+        if (phoneN != null) {
             phone.setText((phoneN));
             phone.setEnabled(false);
         }
@@ -80,7 +76,7 @@ public class ModifyConversationActivity extends AppCompatActivity {
     }
 
     public void saveSeeds() {
-        String phoneNumber = phone.getText().toString();
+        /*String phoneNumber = phone.getText().toString();
         String emissionSeed = emissionKeySeed.getText().toString();
         String receptionSeed = receptionKeySeed.getText().toString();
         String keyStorePassword = keyStoreField.getText().toString();
@@ -97,7 +93,7 @@ public class ModifyConversationActivity extends AppCompatActivity {
             }
         } catch (KeyStoreException e) {
             logger.log(level, e.toString());// Keystore not loaded
-        }
+        }*/
         Intent intent = new Intent(this, Conversation.class);
         intent.putExtra("phoneNumber", phone.getText());
         startActivity(intent);

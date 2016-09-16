@@ -23,7 +23,8 @@ import java.util.ArrayList;
  * @author DonatienTERTRAIS
  */
 public class MainActivity extends AppCompatActivity implements OnItemClickListener, OnItemLongClickListener {
-    protected ArrayList<String> conversationList = new ArrayList<String>();
+    protected ArrayList<String> conversationList = new ArrayList<>();
+    public static final String PHONE = "com.example.utilisateur.cryptotext.PHONE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +33,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     }
 
     public void newConversation(View view){
-        Intent intent = new Intent(this, ModifyConversationActivity.class);
-        intent.putExtra("conversationList", conversationList);
+        Intent intent = new Intent(MainActivity.this, ModifyConversationActivity.class);
         startActivity(intent);
     }
 
@@ -74,12 +74,13 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                 conv.add(cursor.getString(indexAddr));
                 conversationList.add(str);
             }
-        };
+        }
 
         ListView smsListView = (ListView) findViewById( R.id.listView );
-        smsListView.setAdapter( new ArrayAdapter<String>( this, android.R.layout.simple_list_item_1, conversationList) );
+        smsListView.setAdapter( new ArrayAdapter<>( this, android.R.layout.simple_list_item_1, conversationList) );
         smsListView.setOnItemClickListener(this);
         smsListView.setOnItemLongClickListener(this);
+        cursor.close();
     }
 
     public String getContactName(String phoneNumber, ContentResolver cr){
@@ -87,8 +88,8 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         Cursor cursor = cr.query(uri, new String[]{ContactsContract.Data.DISPLAY_NAME}, null, null, null);
         if (cursor != null && cursor.moveToFirst()) {
             phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+            cursor.close();
         }
-        cursor.close();
         return phoneNumber;
     }
     //The SMS text is obtained from the list, decrypted and then shown. SmsReceiver.PASSWORD can be changed in any way. The list item listener is as follows:
@@ -96,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     public void onItemClick( AdapterView<?> parent, View view, int pos, long id ) {
         String phoneNumber = conversationList.get(pos).split("\n")[1];
         Intent intent = new Intent(this, ModifyConversationActivity.class);
-        intent.putExtra("phoneNumber", phoneNumber);
+        intent.putExtra(PHONE, phoneNumber);
         startActivity(intent);
     }
 
