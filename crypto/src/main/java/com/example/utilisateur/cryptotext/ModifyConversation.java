@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ModifyConversation extends AppCompatActivity {
+    private static String keyStorePassword2;
     private static final Level level = Level.WARNING;
     private static Logger logger = Logger.getLogger(Encryption.class.getName());
     private EditText phone = (EditText) findViewById(R.id.phone);
@@ -30,27 +31,36 @@ public class ModifyConversation extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_modifyconversation);
 
+        // TODO ask for keyStorePassword through alertdialog
+
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
-            if(extras != null) {
+            if (extras != null) {
                 phoneN = extras.getString(MainActivity.PHONE);
             }
         } else {
             phoneN = (String) savedInstanceState.getSerializable(MainActivity.PHONE);
         }
-        if (phoneN != null) {
+        if (!phoneN.isEmpty()) {
             phone.setText((phoneN));
             phone.setEnabled(false);
+            // TODO load the seeds
+            if (Encryption.isStocked(phoneN + "Out", keyStorePassword)) {
+
+            }
+            if (Encryption.isStocked(phoneN + "In", keyStorePassword)) {
+
+            }
         }
     }
 
-    public void goToConversation(View view){
+    public void goToConversation(View view) {
         String phoneNumber = phone.getText().toString();
         String emissionSeed = emissionKeySeed.getText().toString();
         String receptionSeed = receptionKeySeed.getText().toString();
         String keyStorePassword = keyStoreField.getText().toString();
         phoneNumber = formatNumber(phoneNumber);
-        String errors ="";
+        String errors = "";
         if (phoneNumber == null) {
             errors = errors + "The phone number isn't correct\n";
         } else {
@@ -60,7 +70,8 @@ public class ModifyConversation extends AppCompatActivity {
                 } else {
                     errors = errors + "There will be no emission seed\n";
                 }
-            } if ((receptionSeed.length() != 0) ^ Encryption.isStocked(phoneNumber + "In", keyStorePassword)) {
+            }
+            if ((receptionSeed.length() != 0) ^ Encryption.isStocked(phoneNumber + "In", keyStorePassword)) {
                 if (receptionSeed.length() != 0) {
                     errors = errors + "The current reception seed will be overwritten\n";
                 } else {
@@ -95,13 +106,13 @@ public class ModifyConversation extends AppCompatActivity {
             logger.log(level, e.toString());// Keystore not loaded
         }
 
-        EditText phone = (EditText) findViewById(R.id.phone);
         Intent intent = new Intent(this, Conversation.class);
-        intent.putExtra("phoneNumber", phone.getText());
+        intent.putExtra("phoneNumber", phoneNumber);
+        intent.putExtra("keyStorePassword", keyStorePassword);
         startActivity(intent);
     }
 
-    public void createAlertDialog (String errors) {
+    public void createAlertDialog(String errors) {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle("Warnings");
         alert.setMessage("Warnings :\n" + errors);
