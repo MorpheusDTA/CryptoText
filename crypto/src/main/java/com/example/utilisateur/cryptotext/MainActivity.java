@@ -30,10 +30,12 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        update();
     }
 
     public void newConversation(View view){
-        Intent intent = new Intent(MainActivity.this, ModifyConversationActivity.class);
+        Intent intent = new Intent(MainActivity.this, ModifyConversation.class);
         startActivity(intent);
     }
 
@@ -56,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         return super.onOptionsItemSelected(item);
     }
 
-    public void update( View v ) {
+    public void update() {
         ArrayList<String> conv = new ArrayList<>();
         ContentResolver contentResolver = getContentResolver();
         Cursor cursor = contentResolver.query(Uri.parse("content://sms/inbox"), null, null, null, null);
@@ -96,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
     public void onItemClick( AdapterView<?> parent, View view, int pos, long id ) {
         String phoneNumber = conversationList.get(pos).split("\n")[1];
-        Intent intent = new Intent(this, ModifyConversationActivity.class);
+        Intent intent = new Intent(this, ModifyConversation.class);
         intent.putExtra(PHONE, phoneNumber);
         startActivity(intent);
     }

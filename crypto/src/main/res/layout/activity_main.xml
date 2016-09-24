@@ -29,14 +29,4 @@
         android:onClick="newConversation"
         android:scaleType="center" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fabSync"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center"
-        android:layout_margin="@dimen/fab_margin"
-        android:src="@android:drawable/stat_notify_sync"
-        android:onClick="update"
-        android:scaleType="center" />
-
 </android.support.design.widget.CoordinatorLayout>

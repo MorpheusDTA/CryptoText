@@ -10,23 +10,23 @@ import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.EditText;
+
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * @author DonatienTERTRAIS
- */
-public class ModifyConversationActivity extends AppCompatActivity {
+public class ModifyConversation extends AppCompatActivity {
     private static final Level level = Level.WARNING;
     private static Logger logger = Logger.getLogger(Encryption.class.getName());
     private EditText phone = (EditText) findViewById(R.id.phone);
-    private EditText receptionKeySeed = (EditText) findViewById(R.id.receptionKeySeed);
-    private EditText emissionKeySeed = (EditText) findViewById(R.id.emissionkeySeed);
-    private EditText keyStoreField = (EditText) findViewById(R.id.keyStorePassword);
+    private EditText receptionKeySeed = (EditText) findViewById(R.id.RKeySeedField);
+    private EditText emissionKeySeed = (EditText) findViewById(R.id.EKeySeedField);
+    private EditText keyStoreField = (EditText) findViewById(R.id.passwordField);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        String phoneN = null;
+        String phoneN = "";
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_modifyconversation);
 
@@ -44,7 +44,7 @@ public class ModifyConversationActivity extends AppCompatActivity {
         }
     }
 
-    public void createConversation(View view){
+    public void goToConversation(View view){
         String phoneNumber = phone.getText().toString();
         String emissionSeed = emissionKeySeed.getText().toString();
         String receptionSeed = receptionKeySeed.getText().toString();
@@ -54,17 +54,17 @@ public class ModifyConversationActivity extends AppCompatActivity {
         if (phoneNumber == null) {
             errors = errors + "The phone number isn't correct\n";
         } else {
-            if (emissionSeed.length() != 0 ^ Encryption.isStocked(phoneNumber + "Out", keyStorePassword)) {
+            if ((emissionSeed.length() != 0) ^ Encryption.isStocked(phoneNumber + "Out", keyStorePassword)) {
                 if (emissionSeed.length() != 0) {
                     errors = errors + "The current emission seed will be overwritten\n";
                 } else {
-                    errors = errors + "The emission seed must be set\n";
+                    errors = errors + "There will be no emission seed\n";
                 }
-            } if (receptionSeed.length() != 0 ^ Encryption.isStocked(phoneNumber + "In", keyStorePassword)) {
+            } if ((receptionSeed.length() != 0) ^ Encryption.isStocked(phoneNumber + "In", keyStorePassword)) {
                 if (receptionSeed.length() != 0) {
                     errors = errors + "The current reception seed will be overwritten\n";
                 } else {
-                    errors = errors + "The reception seed must be set\n";
+                    errors = errors + "There will be no reception seed\n";
                 }
             }
         }
@@ -76,10 +76,10 @@ public class ModifyConversationActivity extends AppCompatActivity {
     }
 
     public void saveSeeds() {
-        /*String phoneNumber = phone.getText().toString();
+        String phoneNumber = phone.getText().toString();
+        String keyStorePassword = keyStoreField.getText().toString();
         String emissionSeed = emissionKeySeed.getText().toString();
         String receptionSeed = receptionKeySeed.getText().toString();
-        String keyStorePassword = keyStoreField.getText().toString();
         KeyStore keyStore = Encryption.createKeyStore(keyStorePassword);
         KeyStore.PasswordProtection passwordProtection = new KeyStore.PasswordProtection(keyStorePassword.toCharArray());
         try {
@@ -93,7 +93,9 @@ public class ModifyConversationActivity extends AppCompatActivity {
             }
         } catch (KeyStoreException e) {
             logger.log(level, e.toString());// Keystore not loaded
-        }*/
+        }
+
+        EditText phone = (EditText) findViewById(R.id.phone);
         Intent intent = new Intent(this, Conversation.class);
         intent.putExtra("phoneNumber", phone.getText());
         startActivity(intent);
@@ -125,10 +127,6 @@ public class ModifyConversationActivity extends AppCompatActivity {
         if (!phoneNumber.startsWith("+")) {
             phoneNumber = "+" + CountryToPhonePrefix.prefixFor(iso.toUpperCase()) + phoneNumber;
         }
-        if (android.os.Build.VERSION.SDK_INT >= 21) {
-            return PhoneNumberUtils.formatNumberToE164(phoneNumber, iso);
-        } else {
-            return PhoneNumberUtils.formatNumber(phoneNumber);
-        }
+        return PhoneNumberUtils.formatNumberToE164(phoneNumber, iso);
     }
 }

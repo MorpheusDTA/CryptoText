@@ -34,13 +34,10 @@
         </receiver>
 
         <activity
-            android:name=".ModifyConversationActivity"
-            android:label="ModifyConversationActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
             android:name=".Conversation"
             android:label="@string/title_activity_conversation"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".ModifyConversation"></activity>
     </application>
 
 </manifest>
