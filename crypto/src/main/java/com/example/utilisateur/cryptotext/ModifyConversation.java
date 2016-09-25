@@ -45,12 +45,12 @@ public class ModifyConversation extends AppCompatActivity {
             phone.setText((phoneN));
             phone.setEnabled(false);
             // TODO load the seeds
-            if (Encryption.isStocked(phoneN + "Out", keyStorePassword)) {
+            /*if (Encryption.isStocked(phoneN + "Out", keyStorePassword)) {
 
             }
             if (Encryption.isStocked(phoneN + "In", keyStorePassword)) {
 
-            }
+            }*/
         }
     }
 

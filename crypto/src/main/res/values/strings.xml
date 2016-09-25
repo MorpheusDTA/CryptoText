@@ -8,4 +8,5 @@
     <string name="key_store_file_password">Key Store File Password</string>
     <string name="emission_key_seed">Emission Key Seed</string>
     <string name="reception_key_seed">Reception Key Seed</string>
+    <string name="message">Message</string>
 </resources>

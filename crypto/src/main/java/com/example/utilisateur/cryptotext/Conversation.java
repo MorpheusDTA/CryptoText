@@ -1,5 +1,6 @@
 package com.example.utilisateur.cryptotext;
 
+import android.content.ContentResolver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -7,7 +8,11 @@ import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 
 public class Conversation extends AppCompatActivity {
     private TextView contact = (TextView) findViewById(R.id.contact);
@@ -66,8 +71,29 @@ public class Conversation extends AppCompatActivity {
         }*/
     }
 
-    public void loadMessages () {
+    public void loadMessages (String number) {
+        ArrayList<String> messages = new ArrayList<>();
+        ContentResolver contentResolver = getContentResolver();
+        Cursor cursor = contentResolver.query(Uri.parse("content://sms"), null, null, null, null);
+        int indexAddr = cursor.getColumnIndex("Address");
 
+        if ( cursor.getColumnIndex( "Body" ) < 0 || !cursor.moveToFirst() ) return;
+
+        String str = "Conversation: " + getContactName(cursor.getString( indexAddr ), contentResolver) + "\n" + cursor.getString(indexAddr) /*+ "\n" + date + " " + hour*/;
+        conv.add(cursor.getString(indexAddr));
+        while( cursor.moveToNext() ){
+            if ( !conv.contains(cursor.getString( indexAddr )) ) {
+                str = "Conversation: " + getContactName(cursor.getString( indexAddr ), contentResolver) + "\n" + cursor.getString(indexAddr)/*+ "\n" + cursor.getString( indexDate )*/;
+                conv.add(cursor.getString(indexAddr));
+                conversationList.add(str);
+            }
+        }
+
+        ListView smsListView = (ListView) findViewById( R.id.listView );
+        smsListView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, conversationList));
+        smsListView.setOnItemClickListener(this);
+        smsListView.setOnItemLongClickListener(this);
+        cursor.close();
     }
 
     public void send (View view) {

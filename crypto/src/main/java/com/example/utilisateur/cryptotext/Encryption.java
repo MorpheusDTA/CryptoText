@@ -50,6 +50,7 @@ public class Encryption {
             } catch ( CertificateException e) {
                 logger.log(level, e.toString());// KeyStore certificates cannot be loaded
             } catch ( IOException e) {
+                keyStore = null;
                 logger.log(level, e.toString());// Error keystore file password
             }
         } else {
