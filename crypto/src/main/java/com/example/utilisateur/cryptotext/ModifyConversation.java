@@ -43,8 +43,8 @@ public class ModifyConversation extends AppCompatActivity {
     }
 
     public void setPhoneAndContact(String phoneNumber){
-        EditText phone = (EditText) findViewById(R.id.phone);
         TextView contact = (TextView) findViewById(R.id.contactName);
+        EditText phone = (EditText) findViewById(R.id.phone);
         phone.setText(phoneNumber);
         phone.setEnabled(false);
 
