@@ -78,7 +78,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
         if ( indexBody < 0 || !cursor.moveToFirst() ) return;
         String message;
-        if (cursor.getString(indexAddr) == number){
+        if (cursor.getString(indexAddr).equals(number)){
             message = getDate(cursor.getLong(indexDate)) + cursor.getString(indexBody);
             messages.add(message);
         }

@@ -4,12 +4,16 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -17,48 +21,51 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ModifyConversation extends AppCompatActivity {
-    private static String keyStorePassword2;
     private static final Level level = Level.WARNING;
     private static Logger logger = Logger.getLogger(Encryption.class.getName());
-    private EditText phone = (EditText) findViewById(R.id.phone);
-    private EditText receptionKeySeed = (EditText) findViewById(R.id.RKeySeedField);
-    private EditText emissionKeySeed = (EditText) findViewById(R.id.EKeySeedField);
-    private EditText keyStoreField = (EditText) findViewById(R.id.passwordField);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        String phoneN = "";
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_modifyconversation);
+        setContentView(R.layout.activity_modify_conversation);
 
-        // TODO ask for keyStorePassword through alertdialog
-
+        String phoneN;
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if (extras != null) {
                 phoneN = extras.getString(MainActivity.PHONE);
+                setPhoneAndContact(phoneN);
             }
         } else {
             phoneN = (String) savedInstanceState.getSerializable(MainActivity.PHONE);
+            setPhoneAndContact(phoneN);
         }
-        if (!phoneN.isEmpty()) {
-            phone.setText((phoneN));
-            phone.setEnabled(false);
-            // TODO load the seeds
-            /*if (Encryption.isStocked(phoneN + "Out", keyStorePassword)) {
+    }
 
-            }
-            if (Encryption.isStocked(phoneN + "In", keyStorePassword)) {
+    public void setPhoneAndContact(String phoneNumber){
+        EditText phone = (EditText) findViewById(R.id.phone);
+        TextView contact = (TextView) findViewById(R.id.contactName);
+        phone.setText(phoneNumber);
+        phone.setEnabled(false);
 
-            }*/
+        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+        Cursor cursor = getContentResolver().query(uri, new String[]{ContactsContract.Data.DISPLAY_NAME}, null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            contact.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME)));
+            cursor.close();
         }
     }
 
     public void goToConversation(View view) {
+        EditText phone = (EditText) findViewById(R.id.phone);
+        EditText receptionKeySeed = (EditText) findViewById(R.id.RKeySeedField);
+        EditText emissionKeySeed = (EditText) findViewById(R.id.EKeySeedField);
+        EditText keyStoreField = (EditText) findViewById(R.id.passwordField);
         String phoneNumber = phone.getText().toString();
         String emissionSeed = emissionKeySeed.getText().toString();
         String receptionSeed = receptionKeySeed.getText().toString();
         String keyStorePassword = keyStoreField.getText().toString();
+
         phoneNumber = formatNumber(phoneNumber);
         String errors = "";
         if (phoneNumber == null) {
@@ -87,10 +94,15 @@ public class ModifyConversation extends AppCompatActivity {
     }
 
     public void saveSeeds() {
+        EditText phone = (EditText) findViewById(R.id.phone);
+        EditText receptionKeySeed = (EditText) findViewById(R.id.RKeySeedField);
+        EditText emissionKeySeed = (EditText) findViewById(R.id.EKeySeedField);
+        EditText keyStoreField = (EditText) findViewById(R.id.passwordField);
         String phoneNumber = phone.getText().toString();
         String keyStorePassword = keyStoreField.getText().toString();
         String emissionSeed = emissionKeySeed.getText().toString();
         String receptionSeed = receptionKeySeed.getText().toString();
+
         KeyStore keyStore = Encryption.createKeyStore(keyStorePassword);
         KeyStore.PasswordProtection passwordProtection = new KeyStore.PasswordProtection(keyStorePassword.toCharArray());
         try {

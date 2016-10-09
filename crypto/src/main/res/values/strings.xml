@@ -4,7 +4,7 @@
     <string name="title_activity_main2">Main2Activity</string>
     <string name="title_activity_conversation">Conversation</string>
     <string name="phone_number">Phone Number</string>
-    <string name="create_conversation">Create Conversation</string>
+    <string name="go_to_conversation">Go to Conversation</string>
     <string name="key_store_file_password">Key Store File Password</string>
     <string name="emission_key_seed">Emission Key Seed</string>
     <string name="reception_key_seed">Reception Key Seed</string>

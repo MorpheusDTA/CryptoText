@@ -24,7 +24,7 @@ import java.util.ArrayList;
  */
 public class MainActivity extends AppCompatActivity implements OnItemClickListener, OnItemLongClickListener {
     protected ArrayList<String> conversationList = new ArrayList<>();
-    public static final String PHONE = "com.example.utilisateur.cryptotext.PHONE";
+    public static String PHONE = "phoneNumber";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     }
 
     public void newConversation(View view){
-        Intent intent = new Intent(MainActivity.this, ModifyConversation.class);
+        Intent intent = new Intent(this, ModifyConversation.class);
         startActivity(intent);
     }
 
@@ -88,11 +88,12 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     public String getContactName(String phoneNumber, ContentResolver cr){
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
         Cursor cursor = cr.query(uri, new String[]{ContactsContract.Data.DISPLAY_NAME}, null, null, null);
+        String contactName = "";
         if (cursor != null && cursor.moveToFirst()) {
-            phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+            contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
             cursor.close();
         }
-        return phoneNumber;
+        return contactName;
     }
     //The SMS text is obtained from the list, decrypted and then shown. SmsReceiver.PASSWORD can be changed in any way. The list item listener is as follows:
 

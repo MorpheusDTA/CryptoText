@@ -37,10 +37,7 @@ public class SmsReceiver extends BroadcastReceiver {
             // Get ContentResolver object for pushing SMS to the incoming folder
             ContentResolver contentResolver = context.getContentResolver();
 
-            for ( int i = 0; i < msgs.length; ++i ) {
-                SmsMessage sms = msgs[i];
-
-                String body = sms.getMessageBody().toString();
+            for (SmsMessage sms:msgs) {
                 String address = sms.getOriginatingAddress();
 
                 //Resolving the contact name from the contacts.
@@ -75,7 +72,7 @@ public class SmsReceiver extends BroadcastReceiver {
         values.put( "Seen", MESSAGE_IS_NOT_SEEN );
         try
         {
-            String encryptedPassword = Encryption.encrypt( new String(PASSWORD), sms.getMessageBody().toString() );
+            String encryptedPassword = Encryption.encrypt( new String(PASSWORD), sms.getMessageBody() );
             values.put( "Body", encryptedPassword );
         }
         catch ( Exception e )
