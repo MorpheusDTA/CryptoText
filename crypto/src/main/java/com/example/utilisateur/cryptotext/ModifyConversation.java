@@ -119,7 +119,7 @@ public class ModifyConversation extends AppCompatActivity {
         }
 
         Intent intent = new Intent(this, Conversation.class);
-        intent.putExtra("phoneNumber", phoneNumber);
+        intent.putExtra(MainActivity.PHONE, phoneNumber);
         intent.putExtra("keyStorePassword", keyStorePassword);
         startActivity(intent);
     }

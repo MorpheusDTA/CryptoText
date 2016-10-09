@@ -18,24 +18,28 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class Conversation extends AppCompatActivity implements AdapterView.OnItemLongClickListener {
-    private TextView contact = (TextView) findViewById(R.id.contact);
-    private TextView phone = (TextView) findViewById(R.id.phone);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
+        TextView contact = (TextView) findViewById(R.id.contact);
+        TextView phone = (TextView) findViewById(R.id.phone);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         String phoneNumber = "";
+        String keyStorePassword = "";
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if(extras != null) {
                 phoneNumber = extras.getString(MainActivity.PHONE);
+                keyStorePassword = extras.getString("keyStorePassword");
             }
         } else {
             phoneNumber = (String) savedInstanceState.getSerializable(MainActivity.PHONE);
+            keyStorePassword = (String) savedInstanceState.getSerializable("keyStorePassword");
         }
 
         String contactName = "Unknown";
