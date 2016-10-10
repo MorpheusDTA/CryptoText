@@ -6,12 +6,6 @@
     android:fitsSystemWindows="true"
     tools:context="com.example.utilisateur.cryptotext.MainActivity">
 
-    <TextView
-        android:text="TextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView2" />
-
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
@@ -21,7 +15,7 @@
 
     <ListView
         android:layout_width="wrap_content"
-        android:layout_height="378dp"
+        android:layout_height="match_parent"
         android:id="@+id/listView" />
 
     <android.support.design.widget.FloatingActionButton
