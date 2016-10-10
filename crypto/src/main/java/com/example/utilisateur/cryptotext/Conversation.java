@@ -7,11 +7,14 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.telephony.SmsManager;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
@@ -24,7 +27,6 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
         TextView contact = (TextView) findViewById(R.id.contact);
-        TextView phone = (TextView) findViewById(R.id.phone);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -50,26 +52,9 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         }
         cursor.close();
 
-        contact.setText(contactName);
-        phone.setText(phoneNumber);
+        contact.setText(contactName + "/" + phoneNumber);
 
         loadMessages(phoneNumber);
-
-        // TODO move
-        // Sending SMS
-        /*Log.i("Send SMS", "");
-        String phoneNo = txtphoneNo.getText().toString();
-        String message = txtMessage.getText().toString();
-
-        try {
-            SmsManager smsManager = SmsManager.getDefault();
-            //TODO encrypting / decrypting
-            smsManager.sendTextMessage(phoneNo, null, message, null, null);
-            Toast.makeText(getApplicationContext(), "SMS sent.", Toast.LENGTH_LONG).show();
-        } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), "SMS faild, please try again.", Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }*/
     }
 
     public void loadMessages (String number) {
@@ -89,7 +74,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
         while( cursor.moveToNext() ){
             if ( number.equals(cursor.getString(indexAddr))) {
-                message = getDate(cursor.getLong(indexDate)) + cursor.getString(indexBody);
+                message = getDate(cursor.getLong(indexDate)) + "\n" + cursor.getString(indexBody);
                 messages.add(message);
             }
         }
@@ -101,7 +86,24 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void send (View view) {
+        // Sending SMS
+        EditText messageField = (EditText) findViewById(R.id.message);
+        TextView contactAndPhone = (TextView) findViewById(R.id.contact);
+        String infos = contactAndPhone.getText().toString();
+        int indexSeparator = infos.lastIndexOf("/");
+        String phoneNo = infos.substring(indexSeparator + 1);
+        String contact = infos.substring(0, indexSeparator);
+        String message = messageField.getText().toString();
 
+        try {
+            SmsManager smsManager = SmsManager.getDefault();
+            //TODO encrypting
+            smsManager.sendTextMessage(phoneNo, null, message, null, null);
+            Toast.makeText(getApplicationContext(), "SMS sent to " + contact, Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(getApplicationContext(), "SMS faild, please try again.", Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
     }
 
     public String getDate(Long millis){
