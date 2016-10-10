@@ -50,7 +50,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
         contact.setText(contactName + "/" + phoneNumber);
 
-        loadMessages(phoneNumber);
+        //loadMessages(phoneNumber);
     }
 
     public void loadMessages (String number) {
