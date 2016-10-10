@@ -26,22 +26,19 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
+
         TextView contact = (TextView) findViewById(R.id.contact);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
         String phoneNumber = "";
-        String keyStorePassword = "";
+        //String keyStorePassword = "";
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if(extras != null) {
                 phoneNumber = extras.getString(MainActivity.PHONE);
-                keyStorePassword = extras.getString("keyStorePassword");
+                //keyStorePassword = extras.getString("keyStorePassword");
             }
         } else {
             phoneNumber = (String) savedInstanceState.getSerializable(MainActivity.PHONE);
-            keyStorePassword = (String) savedInstanceState.getSerializable("keyStorePassword");
+            //keyStorePassword = (String) savedInstanceState.getSerializable("keyStorePassword");
         }
 
         String contactName = "Unknown";

@@ -10,4 +10,5 @@
     <string name="reception_key_seed">Reception Key Seed</string>
     <string name="message">Message</string>
     <string name="contact_phone">Contact/Phone Number</string>
+    <string name="title_activity_conversation2">Conversation2</string>
 </resources>

@@ -58,27 +58,32 @@ public class ModifyConversation extends AppCompatActivity {
 
     public void goToConversation(View view) {
         EditText phone = (EditText) findViewById(R.id.phone);
-        EditText receptionKeySeed = (EditText) findViewById(R.id.RKeySeedField);
+        /*EditText receptionKeySeed = (EditText) findViewById(R.id.RKeySeedField);
         EditText emissionKeySeed = (EditText) findViewById(R.id.EKeySeedField);
-        EditText keyStoreField = (EditText) findViewById(R.id.passwordField);
-        String phoneNumber = phone.getText().toString();
-        String emissionSeed = emissionKeySeed.getText().toString();
+        EditText keyStoreField = (EditText) findViewById(R.id.passwordField);*/
+        String phoneNumber = formatNumber(phone.getText().toString());
+        /*String emissionSeed = emissionKeySeed.getText().toString();
         String receptionSeed = receptionKeySeed.getText().toString();
-        String keyStorePassword = keyStoreField.getText().toString();
+        String keyStorePassword = keyStoreField.getText().toString();*/
 
-        phoneNumber = formatNumber(phoneNumber);
+        Intent intent = new Intent(this, Conversation.class);
+        intent.putExtra(MainActivity.PHONE, phoneNumber);
+        //intent.putExtra("keyStorePassword", keyStorePassword);
+        startActivity(intent);
+
+        /*phoneNumber = formatNumber(phoneNumber);
         String errors = "";
-        if (phoneNumber == null) {
+        if (phoneNumber.isEmpty()) {
             errors = errors + "The phone number isn't correct\n";
         } else {
-            if ((emissionSeed.length() != 0) ^ Encryption.isStocked(phoneNumber + "Out", keyStorePassword)) {
+            if ((!emissionSeed.isEmpty()) ^ Encryption.isStocked(phoneNumber + "Out", keyStorePassword)) {
                 if (emissionSeed.length() != 0) {
                     errors = errors + "The current emission seed will be overwritten\n";
                 } else {
                     errors = errors + "There will be no emission seed\n";
                 }
             }
-            if ((receptionSeed.length() != 0) ^ Encryption.isStocked(phoneNumber + "In", keyStorePassword)) {
+            if ((!receptionSeed.isEmpty()) ^ Encryption.isStocked(phoneNumber + "In", keyStorePassword)) {
                 if (receptionSeed.length() != 0) {
                     errors = errors + "The current reception seed will be overwritten\n";
                 } else {
@@ -90,7 +95,7 @@ public class ModifyConversation extends AppCompatActivity {
             saveSeeds();
         } else {
             createAlertDialog(errors);
-        }
+        }*/
     }
 
     public void saveSeeds() {

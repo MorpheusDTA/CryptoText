@@ -6,17 +6,23 @@
     android:fitsSystemWindows="true"
     tools:context="com.example.utilisateur.cryptotext.MainActivity">
 
-    <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="433dp"
-        android:id="@+id/listView" />
-
-    <android.support.design.widget.AppBarLayout
+    <TextView
+        android:text="TextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:id="@+id/textView2" />
 
-    </android.support.design.widget.AppBarLayout>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </LinearLayout>
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="378dp"
+        android:id="@+id/listView" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
