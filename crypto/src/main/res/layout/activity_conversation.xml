@@ -25,16 +25,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="@string/contact_phone"
             android:id="@+id/contact"
-            android:layout_weight="0.07"
-            android:editable="true" />
+            android:layout_weight="0.07" />
 
         <ListView
             android:layout_width="wrap_content"
             android:layout_height="190dp"
             android:id="@+id/smsList"
-            android:layout_weight="0.84" />
+            android:layout_weight="0.84"
+            android:stackFromBottom="true"
+            android:transcriptMode="alwaysScroll" />
 
         <EditText
             android:layout_height="wrap_content"

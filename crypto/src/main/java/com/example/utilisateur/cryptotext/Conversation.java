@@ -18,6 +18,7 @@ import android.widget.Toast;
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 
 public class Conversation extends AppCompatActivity implements AdapterView.OnItemLongClickListener {
 
@@ -50,32 +51,34 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
         contact.setText(contactName + "/" + phoneNumber);
 
-        //loadMessages(phoneNumber);
+        loadMessages(phoneNumber);
     }
 
     public void loadMessages (String number) {
         ArrayList<String> messages = new ArrayList<>();
         ContentResolver contentResolver = getContentResolver();
-        Cursor cursor = contentResolver.query(Uri.parse("content://sms"), null, null, null, null);
-        int indexAddr = cursor.getColumnIndex("Address");
-        int indexDate = cursor.getColumnIndex("Date");
-        int indexBody = cursor.getColumnIndex("Body");
+        Cursor cursor = contentResolver.query(Uri.parse("content://sms/"), new String[] {"address", "body", "date", "type" },
+                "address='" + number + "'", null, null);
+        int indexAddress = cursor.getColumnIndex("address");
+        int indexDate = cursor.getColumnIndex("date");
+        int indexBody = cursor.getColumnIndex("body");
+        int indexType = cursor.getColumnIndex("type");
 
         if ( indexBody < 0 || !cursor.moveToFirst() ) return;
         String message;
-        if (cursor.getString(indexAddr).equals(number)){
-            message = getDate(cursor.getLong(indexDate)) + cursor.getString(indexBody);
+        if (cursor.getString(indexAddress).equals(number)){
+            message = getDate(cursor.getLong(indexDate)) + "\n" + cursor.getString(indexBody);
             messages.add(message);
         }
 
         while( cursor.moveToNext() ){
-            if ( number.equals(cursor.getString(indexAddr))) {
+            if ( number.equals(cursor.getString(indexAddress))) {
                 message = getDate(cursor.getLong(indexDate)) + "\n" + cursor.getString(indexBody);
                 messages.add(message);
             }
         }
-
-        ListView smsListView = (ListView) findViewById( R.id.listView );
+        Collections.reverse(messages);
+        ListView smsListView = (ListView) findViewById( R.id.smsList );
         smsListView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, messages));
         smsListView.setOnItemLongClickListener(this);
         cursor.close();
