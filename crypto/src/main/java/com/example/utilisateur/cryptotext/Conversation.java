@@ -2,12 +2,14 @@ package com.example.utilisateur.cryptotext;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -56,6 +58,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
     public void loadMessages (String number) {
         ArrayList<String> messages = new ArrayList<>();
+        final ArrayList<Integer> types = new ArrayList<>();
         ContentResolver contentResolver = getContentResolver();
         Cursor cursor = contentResolver.query(Uri.parse("content://sms/"), new String[] {"address", "body", "date", "type" },
                 "address='" + number + "'", null, null);
@@ -68,18 +71,36 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         String message;
         if (cursor.getString(indexAddress).equals(number)){
             message = getDate(cursor.getLong(indexDate)) + "\n" + cursor.getString(indexBody);
+            types.add(Integer.valueOf(cursor.getInt(indexType)));
             messages.add(message);
         }
 
         while( cursor.moveToNext() ){
             if ( number.equals(cursor.getString(indexAddress))) {
                 message = getDate(cursor.getLong(indexDate)) + "\n" + cursor.getString(indexBody);
+                types.add(Integer.valueOf(cursor.getInt(indexType)));
                 messages.add(message);
             }
         }
         Collections.reverse(messages);
+        Collections.reverse(types);
         ListView smsListView = (ListView) findViewById( R.id.smsList );
-        smsListView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, messages));
+        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, messages) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View row = super.getView(position, convertView, parent);
+                // Background color depends on whether the sms is sent/received
+                Color color = new Color();
+                if (types.get(position) == 1) {
+                    row.setBackgroundColor(color.rgb(255, 255, 102));// pink, received
+                } else {
+                    row.setBackgroundColor(color.rgb(153, 204, 255));// blue, sent
+                }
+                return row;
+            }
+        };
+        smsListView.setAdapter(adapter);
+        //smsListView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, messages));
         smsListView.setOnItemLongClickListener(this);
         cursor.close();
     }
