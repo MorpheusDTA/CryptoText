@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.telephony.SmsMessage;
+import android.view.InputEvent;
 import android.widget.Toast;
 import android.provider.Telephony.Sms.Intents;
 
@@ -55,6 +56,7 @@ public class SmsReceiver extends BroadcastReceiver {
             // Display SMS message
             Toast.makeText(context, messages, Toast.LENGTH_SHORT).show();
         }
+
         // this.abortBroadcast();
     }
 

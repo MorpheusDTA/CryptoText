@@ -23,14 +23,53 @@ import java.util.Calendar;
 import java.util.Collections;
 
 public class Conversation extends AppCompatActivity implements AdapterView.OnItemLongClickListener {
+    private ArrayList<String> messages = new ArrayList<>();
+    private ArrayList<Integer> types = new ArrayList<>();
+
+    private ArrayList<String> getMessages() {
+        return messages;
+    }
+
+    private void setMessages(ArrayList<String> messages) {
+        this.messages = messages;
+        ListView smsListView = (ListView) findViewById( R.id.smsList );
+        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, messages) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View row = super.getView(position, convertView, parent);
+                // Background color depends on whether the sms is sent/received
+                Color color = new Color();
+                if (types.get(position) == 1) {
+                    row.setBackgroundColor(color.rgb(255, 255, 102));// yellow, received
+                    row.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+                } else {
+                    row.setBackgroundColor(color.rgb(153, 204, 255));// blue, sent
+                    row.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+                }
+                return row;
+            }
+        };
+        smsListView.setAdapter(adapter);
+        smsListView.setOnItemLongClickListener(this);
+    }
+
+    private ArrayList<Integer> getTypes() {
+        return types;
+    }
+
+    private void setTypes(ArrayList<Integer> types) {
+        this.types = types;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
 
-        TextView contact = (TextView) findViewById(R.id.contact);
+        types.clear();
+        messages.clear();
         String phoneNumber = "";
+        TextView contact = (TextView) findViewById(R.id.contact);
         //String keyStorePassword = "";
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
@@ -51,14 +90,16 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         }
         cursor.close();
 
-        contact.setText(contactName + "/" + phoneNumber);
+        String str = contactName + "/" + phoneNumber;
+        contact.setText(str);
 
         loadMessages(phoneNumber);
     }
 
     public void loadMessages (String number) {
-        ArrayList<String> messages = new ArrayList<>();
-        final ArrayList<Integer> types = new ArrayList<>();
+        ArrayList<String> mess = new ArrayList<>();
+        final ArrayList<Integer> type = new ArrayList<>();
+
         ContentResolver contentResolver = getContentResolver();
         Cursor cursor = contentResolver.query(Uri.parse("content://sms/"), new String[] {"address", "body", "date", "type" },
                 "address='" + number + "'", null, null);
@@ -71,37 +112,20 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         String message;
         if (cursor.getString(indexAddress).equals(number)){
             message = getDate(cursor.getLong(indexDate)) + "\n" + cursor.getString(indexBody);
-            types.add(Integer.valueOf(cursor.getInt(indexType)));
-            messages.add(message);
+            type.add(0, cursor.getInt(indexType));
+            mess.add(0, message);
         }
 
         while( cursor.moveToNext() ){
             if ( number.equals(cursor.getString(indexAddress))) {
                 message = getDate(cursor.getLong(indexDate)) + "\n" + cursor.getString(indexBody);
-                types.add(Integer.valueOf(cursor.getInt(indexType)));
-                messages.add(message);
+                type.add(0, cursor.getInt(indexType));
+                mess.add(0, message);
             }
         }
-        Collections.reverse(messages);
-        Collections.reverse(types);
-        ListView smsListView = (ListView) findViewById( R.id.smsList );
-        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, messages) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View row = super.getView(position, convertView, parent);
-                // Background color depends on whether the sms is sent/received
-                Color color = new Color();
-                if (types.get(position) == 1) {
-                    row.setBackgroundColor(color.rgb(255, 255, 102));// pink, received
-                } else {
-                    row.setBackgroundColor(color.rgb(153, 204, 255));// blue, sent
-                }
-                return row;
-            }
-        };
-        smsListView.setAdapter(adapter);
-        //smsListView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, messages));
-        smsListView.setOnItemLongClickListener(this);
+
+        setTypes(type);
+        setMessages(mess);
         cursor.close();
     }
 
@@ -124,18 +148,27 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             Toast.makeText(getApplicationContext(), "SMS faild, please try again.", Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
+
+        getTypes().add(0, 0);
+        getMessages().add(0, getDate(null) + "\n" + message);
+        setTypes(getTypes());
+        setMessages(getMessages());
+
+        messageField.getText().clear();
     }
 
     public String getDate(Long millis){
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(millis);
+        if (millis != null) {
+            calendar.setTimeInMillis(millis);
+        }
 
         int date = calendar.get(Calendar.DAY_OF_MONTH);
         int year = calendar.get(Calendar.YEAR);
-        String month = new DateFormatSymbols().getMonths()[calendar.get(Calendar.MONTH)].substring(0,3);
+        String month = new DateFormatSymbols().getMonths()[calendar.get(Calendar.MONTH)];
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
-        return month + ". " + date + " " + year + " " + hour + ":" + minute;
+        return month + " " + date + " " + year + " " + hour + ":" + minute;
     }
 
     @Override
