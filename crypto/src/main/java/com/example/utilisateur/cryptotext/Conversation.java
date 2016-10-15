@@ -20,8 +20,7 @@ import android.widget.Toast;
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-
+//TODO : events
 public class Conversation extends AppCompatActivity implements AdapterView.OnItemLongClickListener {
     private ArrayList<String> messages = new ArrayList<>();
     private ArrayList<Integer> types = new ArrayList<>();

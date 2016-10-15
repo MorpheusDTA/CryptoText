@@ -61,9 +61,6 @@ public class SmsReceiver extends BroadcastReceiver {
     }
 
     private void putSmsToDatabase( ContentResolver contentResolver, SmsMessage sms ) {
-
-        //Resolving the contact name from the contacts.
-
         // Create SMS row
         ContentValues values = new ContentValues();
         values.put( "address", sms.getOriginatingAddress());
