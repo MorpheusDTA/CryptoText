@@ -68,17 +68,18 @@ public class SmsReceiver extends BroadcastReceiver {
         ContentValues values = new ContentValues();
         values.put( "address", sms.getOriginatingAddress());
         values.put( "date", sms.getTimestampMillis());
-        values.put( "read", MESSAGE_IS_NOT_READ);
+        values.put( "read", false);
         values.put( "status", sms.getStatus());
         values.put( "type", MESSAGE_TYPE_INBOX);
         values.put( "seen", MESSAGE_IS_NOT_SEEN);
-        try {
+        values.put( "body", sms.getMessageBody());
+        /*try {
             String encryptedPassword = Encryption.encrypt( new String(PASSWORD), sms.getMessageBody() );
             values.put( "Body", encryptedPassword );
         }
         catch ( Exception e ) {
             e.printStackTrace();
-        }
+        }*/
         // Push row into the SMS table
         contentResolver.insert( Uri.parse("content://sms"), values );
     }

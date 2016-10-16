@@ -1,6 +1,9 @@
 package com.example.utilisateur.cryptotext;
 
+import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
@@ -69,8 +72,6 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
 
-        types.clear();
-        messages.clear();
         TextView contact = (TextView) findViewById(R.id.contact);
         //String keyStorePassword = "";
         if (savedInstanceState == null) {
@@ -98,31 +99,43 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void loadMessages () {
+        types.clear();
+        messages.clear();
         ArrayList<String> mess = new ArrayList<>();
         final ArrayList<Integer> type = new ArrayList<>();
 
         ContentResolver contentResolver = getContentResolver();
-        Cursor cursor = contentResolver.query(Uri.parse("content://sms/"), new String[] {"address", "body", "date", "type" },
+        Cursor cursor = contentResolver.query(Uri.parse("content://sms/"), new String[]{"_id", "body", "date", "type", "seen"},
                 "address='" + phoneNumber + "'", null, null);
-        int indexAddress = cursor.getColumnIndex("address");
         int indexDate = cursor.getColumnIndex("date");
         int indexBody = cursor.getColumnIndex("body");
         int indexType = cursor.getColumnIndex("type");
+        int indexSeen = cursor.getColumnIndex("seen");
+        int indexId = cursor.getColumnIndex("_id");
 
         if ( indexBody < 0 || !cursor.moveToFirst() ) return;
+
         String message;
-        if (cursor.getString(indexAddress).equals(phoneNumber)){
-            message = getDate(cursor.getLong(indexDate)) + "\n" + cursor.getString(indexBody);
-            type.add(0, cursor.getInt(indexType));
-            mess.add(0, message);
+        message = getDate(cursor.getLong(indexDate)) + "\n" + cursor.getString(indexBody);
+        if (cursor.getInt(indexSeen) == 0) {
+            ContentValues values = new ContentValues();
+            values.put("read",true);
+            getContentResolver().update(Uri.parse("content://sms/inbox"),values,
+                    "_id="+cursor.getString(indexId), null);
         }
+        type.add(0, cursor.getInt(indexType));
+        mess.add(0, message);
 
         while( cursor.moveToNext() ){
-            if ( phoneNumber.equals(cursor.getString(indexAddress))) {
-                message = getDate(cursor.getLong(indexDate)) + "\n" + cursor.getString(indexBody);
-                type.add(0, cursor.getInt(indexType));
-                mess.add(0, message);
+            message = getDate(cursor.getLong(indexDate)) + "\n" + cursor.getString(indexBody);
+            if (cursor.getInt(indexSeen) == 0) {
+                ContentValues values = new ContentValues();
+                values.put("read",true);
+                getContentResolver().update(Uri.parse("content://sms/inbox"),values,
+                        "_id="+cursor.getString(indexId), null);
             }
+            type.add(0, cursor.getInt(indexType));
+            mess.add(0, message);
         }
 
         setTypes(type);
@@ -141,7 +154,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             smsManager.sendTextMessage(phoneNumber, null, message, null, null);
             Toast.makeText(getApplicationContext(), "SMS sent to " + contactName, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), "SMS faild, please try again.", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "SMS failed, please try again.", Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
 
@@ -169,7 +182,25 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        return false;
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle("Alert!!");
+        alert.setMessage("Are you sure to delete the message from your phone ?\nThe message won't disappear from the contact's phone.");
+        alert.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // TODO delete sms
+                // http://stackoverflow.com/questions/8614211/deleting-android-sms-programatically
+                dialog.dismiss();
+            }
+        });
+        alert.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        alert.show();
+        return true;
     }
 
     @Override

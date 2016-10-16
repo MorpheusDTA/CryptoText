@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -12,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -30,7 +32,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        if (savedInstanceState != null) {
+            update();
+        }
         update();
     }
 
@@ -59,27 +63,45 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     }
 
     public void update() {
-        ArrayList<String> conv = new ArrayList<>();
+        ArrayList<String> numbers = new ArrayList<>();
+        final ArrayList<Integer> seen = new ArrayList<>();
         ContentResolver contentResolver = getContentResolver();
-        Cursor cursor = contentResolver.query(Uri.parse("content://sms/inbox"), null, null, null, null);
-        int indexAddr = cursor.getColumnIndex("Address");
+        Cursor cursor = contentResolver.query(Uri.parse("content://sms/inbox"), new String[]{"address", "seen"}, null, null, null);
+        int indexAddress = cursor.getColumnIndex("address");
+        int indexType = cursor.getColumnIndex("seen");
 
         if ( cursor.getColumnIndex( "Body" ) < 0 || !cursor.moveToFirst() ) return;
 
         conversationList.clear();
-        String str = "Conversation: " + getContactName(cursor.getString( indexAddr ), contentResolver) + "\n" + cursor.getString(indexAddr) /*+ "\n" + date + " " + hour*/;
-        conv.add( cursor.getString(indexAddr));
+        seen.add(cursor.getInt(indexType));
+        numbers.add(cursor.getString(indexAddress));
+        String str = "Conversation: " + getContactName(cursor.getString( indexAddress ), contentResolver) + "\n" + cursor.getString(indexAddress) ;
         conversationList.add(str);
+
         while( cursor.moveToNext() ){
-            if ( !conv.contains(cursor.getString( indexAddr )) ) {
-                str = "Conversation: " + getContactName(cursor.getString( indexAddr ), contentResolver) + "\n" + cursor.getString(indexAddr)/*+ "\n" + cursor.getString( indexDate )*/;
-                conv.add(cursor.getString(indexAddr));
+            if ( !numbers.contains(cursor.getString( indexAddress )) ) {
+                seen.add(cursor.getInt(indexType));
+                numbers.add(cursor.getString(indexAddress));
+                str = "Conversation: " + getContactName(cursor.getString( indexAddress ), contentResolver) + "\n" + cursor.getString(indexAddress);
                 conversationList.add(str);
             }
         }
 
-        ListView smsListView = (ListView) findViewById( R.id.listView );
-        smsListView.setAdapter( new ArrayAdapter<>( this, android.R.layout.simple_list_item_1, conversationList) );
+        ListView smsListView = (ListView) findViewById( R.id.conversationsView );
+        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, conversationList) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View row = super.getView(position, convertView, parent);
+                // Text color depends on whether the sms is read or not
+                if (seen.get(position) == 0) {// unseen
+                    row.setBackgroundColor(Color.rgb(230, 240, 255));//light blue
+                } else {// seen
+                    row.setBackgroundColor(Color.rgb(255, 255, 255));// white
+                }
+                return row;
+            }
+        };
+        smsListView.setAdapter(adapter);
         smsListView.setOnItemClickListener(this);
         smsListView.setOnItemLongClickListener(this);
         cursor.close();
