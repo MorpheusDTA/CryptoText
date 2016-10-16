@@ -189,7 +189,6 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // TODO delete sms
-                // http://stackoverflow.com/questions/8614211/deleting-android-sms-programatically
                 dialog.dismiss();
             }
         });
