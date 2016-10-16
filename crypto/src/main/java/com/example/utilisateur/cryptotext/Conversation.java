@@ -20,10 +20,15 @@ import android.widget.Toast;
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
-//TODO : events
-public class Conversation extends AppCompatActivity implements AdapterView.OnItemLongClickListener {
+
+/**
+ * @author DonatienTertrais
+ */
+public class Conversation extends AppCompatActivity implements AdapterView.OnItemLongClickListener, ReceiveEventListener {
     private ArrayList<String> messages = new ArrayList<>();
     private ArrayList<Integer> types = new ArrayList<>();
+    private String phoneNumber = "";
+    private String contactName = "Unknown";
 
     private ArrayList<String> getMessages() {
         return messages;
@@ -37,12 +42,11 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             public View getView(int position, View convertView, ViewGroup parent) {
                 View row = super.getView(position, convertView, parent);
                 // Background color depends on whether the sms is sent/received
-                Color color = new Color();
                 if (types.get(position) == 1) {
-                    row.setBackgroundColor(color.rgb(255, 255, 102));// yellow, received
+                    row.setBackgroundColor(Color.rgb(255, 255, 102));// yellow, received
                     row.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
                 } else {
-                    row.setBackgroundColor(color.rgb(153, 204, 255));// blue, sent
+                    row.setBackgroundColor(Color.rgb(153, 204, 255));// blue, sent
                     row.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
                 }
                 return row;
@@ -67,7 +71,6 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
         types.clear();
         messages.clear();
-        String phoneNumber = "";
         TextView contact = (TextView) findViewById(R.id.contact);
         //String keyStorePassword = "";
         if (savedInstanceState == null) {
@@ -81,7 +84,6 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             //keyStorePassword = (String) savedInstanceState.getSerializable("keyStorePassword");
         }
 
-        String contactName = "Unknown";
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
         Cursor cursor = getContentResolver().query(uri, new String[]{ContactsContract.Data.DISPLAY_NAME}, null, null, null);
         if (cursor != null && cursor.moveToFirst()) {
@@ -92,16 +94,16 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         String str = contactName + "/" + phoneNumber;
         contact.setText(str);
 
-        loadMessages(phoneNumber);
+        loadMessages();
     }
 
-    public void loadMessages (String number) {
+    public void loadMessages () {
         ArrayList<String> mess = new ArrayList<>();
         final ArrayList<Integer> type = new ArrayList<>();
 
         ContentResolver contentResolver = getContentResolver();
         Cursor cursor = contentResolver.query(Uri.parse("content://sms/"), new String[] {"address", "body", "date", "type" },
-                "address='" + number + "'", null, null);
+                "address='" + phoneNumber + "'", null, null);
         int indexAddress = cursor.getColumnIndex("address");
         int indexDate = cursor.getColumnIndex("date");
         int indexBody = cursor.getColumnIndex("body");
@@ -109,14 +111,14 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
         if ( indexBody < 0 || !cursor.moveToFirst() ) return;
         String message;
-        if (cursor.getString(indexAddress).equals(number)){
+        if (cursor.getString(indexAddress).equals(phoneNumber)){
             message = getDate(cursor.getLong(indexDate)) + "\n" + cursor.getString(indexBody);
             type.add(0, cursor.getInt(indexType));
             mess.add(0, message);
         }
 
         while( cursor.moveToNext() ){
-            if ( number.equals(cursor.getString(indexAddress))) {
+            if ( phoneNumber.equals(cursor.getString(indexAddress))) {
                 message = getDate(cursor.getLong(indexDate)) + "\n" + cursor.getString(indexBody);
                 type.add(0, cursor.getInt(indexType));
                 mess.add(0, message);
@@ -131,18 +133,13 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     public void send (View view) {
         // Sending SMS
         EditText messageField = (EditText) findViewById(R.id.message);
-        TextView contactAndPhone = (TextView) findViewById(R.id.contact);
-        String infos = contactAndPhone.getText().toString();
-        int indexSeparator = infos.lastIndexOf("/");
-        String phoneNo = infos.substring(indexSeparator + 1);
-        String contact = infos.substring(0, indexSeparator);
         String message = messageField.getText().toString();
 
         try {
             SmsManager smsManager = SmsManager.getDefault();
             //TODO encrypting
-            smsManager.sendTextMessage(phoneNo, null, message, null, null);
-            Toast.makeText(getApplicationContext(), "SMS sent to " + contact, Toast.LENGTH_LONG).show();
+            smsManager.sendTextMessage(phoneNumber, null, message, null, null);
+            Toast.makeText(getApplicationContext(), "SMS sent to " + contactName, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             Toast.makeText(getApplicationContext(), "SMS faild, please try again.", Toast.LENGTH_LONG).show();
             e.printStackTrace();
@@ -173,5 +170,12 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         return false;
+    }
+
+    @Override
+    public void onSmsReceived(ReceiveEvent e) {
+        if(e.getNumber().equals(phoneNumber)) {
+            loadMessages();
+        }
     }
 }

@@ -20,7 +20,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * Created by DonatienTERTRAIS on 10/09/2016.
+ * @author DonatienTERTRAIS
  */
 
 //The keys are stocked in a file, this file is protected with a password which is to be given every time a key is used (before openning and creating a conversation

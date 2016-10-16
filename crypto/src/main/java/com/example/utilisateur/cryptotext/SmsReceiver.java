@@ -14,7 +14,7 @@ import android.widget.Toast;
 import android.provider.Telephony.Sms.Intents;
 
 /**
- * Created by DonatienTERTRAIS on 10/09/2016.
+ * @author DonatienTERTRAIS
  */
 public class SmsReceiver extends BroadcastReceiver {
     public static final int MESSAGE_TYPE_INBOX = 1;
@@ -31,7 +31,8 @@ public class SmsReceiver extends BroadcastReceiver {
     public static final byte[] PASSWORD = new byte[]{ 0x20, 0x32, 0x34, 0x47, (byte) 0x84, 0x33, 0x58 };
 
     public void onReceive( Context context, Intent intent ) {
-        String messages = "";
+        String toast = "";
+        String address = "";
 
         SmsMessage[] msgs = Intents.getMessagesFromIntent(intent);
         if ( msgs.length != 0) {
@@ -39,7 +40,7 @@ public class SmsReceiver extends BroadcastReceiver {
             ContentResolver contentResolver = context.getContentResolver();
 
             for (SmsMessage sms:msgs) {
-                String address = sms.getOriginatingAddress();
+                address = sms.getOriginatingAddress();
 
                 //Resolving the contact name from the contacts.
                 Uri lookupUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(address));
@@ -48,13 +49,15 @@ public class SmsReceiver extends BroadcastReceiver {
                     address = c.getString(c.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
                 }
                 c.close();
-                messages += "SMS from " + address + " :\n";
+                toast += "SMS from " + address + " :\n";
 
                 putSmsToDatabase( contentResolver, sms );
             }
 
             // Display SMS message
-            Toast.makeText(context, messages, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, toast, Toast.LENGTH_SHORT).show();
+            ReceiveEvent e = new ReceiveEvent(this, address);
+            e.notifyAll();
         }
 
         // this.abortBroadcast();

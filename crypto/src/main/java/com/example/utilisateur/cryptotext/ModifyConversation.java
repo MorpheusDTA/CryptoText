@@ -20,6 +20,9 @@ import java.security.KeyStoreException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * @author DonatienTertrais
+ */
 public class ModifyConversation extends AppCompatActivity {
     private static final Level level = Level.WARNING;
     private static Logger logger = Logger.getLogger(Encryption.class.getName());
