@@ -24,6 +24,7 @@ import java.util.logging.Logger;
  * @author DonatienTertrais
  */
 public class ModifyConversation extends AppCompatActivity {
+    private String phoneNumber;
     private static final Level level = Level.WARNING;
     private static Logger logger = Logger.getLogger(Encryption.class.getName());
 
@@ -32,20 +33,19 @@ public class ModifyConversation extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_modify_conversation);
 
-        String phoneN;
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if (extras != null) {
-                phoneN = extras.getString(MainActivity.PHONE);
-                setPhoneAndContact(phoneN);
+                phoneNumber = extras.getString(MainActivity.PHONE);
+                setPhoneAndContact();
             }
         } else {
-            phoneN = (String) savedInstanceState.getSerializable(MainActivity.PHONE);
-            setPhoneAndContact(phoneN);
+            phoneNumber = (String) savedInstanceState.getSerializable(MainActivity.PHONE);
+            setPhoneAndContact();
         }
     }
 
-    public void setPhoneAndContact(String phoneNumber){
+    public void setPhoneAndContact(){
         TextView contact = (TextView) findViewById(R.id.contactName);
         EditText phone = (EditText) findViewById(R.id.phone);
         phone.setText(phoneNumber);
@@ -64,7 +64,6 @@ public class ModifyConversation extends AppCompatActivity {
         /*EditText receptionKeySeed = (EditText) findViewById(R.id.RKeySeedField);
         EditText emissionKeySeed = (EditText) findViewById(R.id.EKeySeedField);
         EditText keyStoreField = (EditText) findViewById(R.id.passwordField);*/
-        String phoneNumber = formatNumber(phone.getText().toString());
         /*String emissionSeed = emissionKeySeed.getText().toString();
         String receptionSeed = receptionKeySeed.getText().toString();
         String keyStorePassword = keyStoreField.getText().toString();*/
@@ -74,8 +73,7 @@ public class ModifyConversation extends AppCompatActivity {
         //intent.putExtra("keyStorePassword", keyStorePassword);
         startActivity(intent);
 
-        /*phoneNumber = formatNumber(phoneNumber);
-        String errors = "";
+        /*String errors = "";
         if (phoneNumber.isEmpty()) {
             errors = errors + "The phone number isn't correct\n";
         } else {
@@ -106,7 +104,6 @@ public class ModifyConversation extends AppCompatActivity {
         EditText receptionKeySeed = (EditText) findViewById(R.id.RKeySeedField);
         EditText emissionKeySeed = (EditText) findViewById(R.id.EKeySeedField);
         EditText keyStoreField = (EditText) findViewById(R.id.passwordField);
-        String phoneNumber = phone.getText().toString();
         String keyStorePassword = keyStoreField.getText().toString();
         String emissionSeed = emissionKeySeed.getText().toString();
         String receptionSeed = receptionKeySeed.getText().toString();

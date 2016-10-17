@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.view.View;
@@ -40,9 +41,10 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     private void setMessages(ArrayList<String> messages) {
         this.messages = messages;
         ListView smsListView = (ListView) findViewById( R.id.smsList );
-        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, messages) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, messages) {
             @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
+            @NonNull
+            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
                 View row = super.getView(position, convertView, parent);
                 // Background color depends on whether the sms is sent/received
                 if (types.get(position) == 1) {
