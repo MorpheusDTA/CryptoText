@@ -24,11 +24,17 @@ import android.widget.Toast;
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static java.lang.Math.abs;
 
 /**
  * @author DonatienTertrais
  */
 public class Conversation extends AppCompatActivity implements AdapterView.OnItemLongClickListener, ReceiveEventListener {
+    private static final Level level = Level.WARNING;
+    private static Logger logger = Logger.getLogger(Encryption.class.getName());
     private ArrayList<String> messages = new ArrayList<>();
     private ArrayList<Integer> types = new ArrayList<>();
     private String phoneNumber = "";
@@ -41,7 +47,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     private void setMessages(ArrayList<String> messages) {
         this.messages = messages;
         ListView smsListView = (ListView) findViewById( R.id.smsList );
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, messages) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, this.messages) {
             @Override
             @NonNull
             public View getView(int position, View convertView, @NonNull ViewGroup parent) {
@@ -184,14 +190,18 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        String txt = messages.get(position);
+        final String date = txt.substring(0, txt.indexOf("\n"));
+        final String body = txt.substring(txt.indexOf("\n"));
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle("Alert!!");
         alert.setMessage("Are you sure to delete the message from your phone ?\nThe message won't disappear from the contact's phone.");
         alert.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // TODO delete sms
                 dialog.dismiss();
+                //TODO delete SMS
+                //deleteSMS(body, date);
             }
         });
         alert.setNegativeButton("NO", new DialogInterface.OnClickListener() {
@@ -209,5 +219,35 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         if(e.getNumber().equals(phoneNumber)) {
             loadMessages();
         }
+    }
+
+    /*private void deleteSMS(String body, String date) {
+        try {
+            Long id;
+            Uri uriSms = Uri.parse("content://sms");
+            Cursor c = getContentResolver().query(uriSms, new String[] {"_id", "date"},
+                    "address='" + phoneNumber + "' AND body='" + body + "'", null, null);
+            if (c.moveToFirst()) {
+                boolean cond = abs(millisFromDate(date) - c.getLong(c.getColumnIndex("date"))) < 60000;
+                while (!cond) {
+                    c.moveToNext();
+                    cond = abs(millisFromDate(date) - c.getLong(c.getColumnIndex("date"))) < 60000;
+                }
+                id = c.getLong(c.getColumnIndex("_id"));
+                getContentResolver().delete(Uri.parse("content://sms/" + id), null, null);
+            }
+            c.close();
+        } catch (Exception e) {
+            logger.log(level, e.toString());
+        }
+    }*/
+
+    private Long millisFromDate(String date) {
+        String[] infos = date.split(" ");
+        int ind = infos[4].indexOf(":");
+        Calendar cal = Calendar.getInstance();
+        cal.set(Integer.parseInt(infos[2]), Integer.parseInt(infos[0]), Integer.parseInt(infos[1]),
+                Integer.parseInt(infos[4].substring(0, ind)), Integer.parseInt(infos[4].substring(ind)));
+        return cal.getTimeInMillis();
     }
 }

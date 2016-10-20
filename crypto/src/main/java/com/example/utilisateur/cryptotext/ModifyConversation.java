@@ -45,7 +45,7 @@ public class ModifyConversation extends AppCompatActivity {
         }
     }
 
-    public void setPhoneAndContact(){
+    private void setPhoneAndContact(){
         TextView contact = (TextView) findViewById(R.id.contactName);
         EditText phone = (EditText) findViewById(R.id.phone);
         phone.setText(phoneNumber);
@@ -69,7 +69,7 @@ public class ModifyConversation extends AppCompatActivity {
         String keyStorePassword = keyStoreField.getText().toString();*/
 
         Intent intent = new Intent(this, Conversation.class);
-        intent.putExtra(MainActivity.PHONE, phoneNumber);
+        intent.putExtra(MainActivity.PHONE, formatNumber(phoneNumber));
         //intent.putExtra("keyStorePassword", keyStorePassword);
         startActivity(intent);
 
@@ -99,7 +99,7 @@ public class ModifyConversation extends AppCompatActivity {
         }*/
     }
 
-    public void saveSeeds() {
+    private void saveSeeds() {
         EditText phone = (EditText) findViewById(R.id.phone);
         EditText receptionKeySeed = (EditText) findViewById(R.id.RKeySeedField);
         EditText emissionKeySeed = (EditText) findViewById(R.id.EKeySeedField);
@@ -129,7 +129,7 @@ public class ModifyConversation extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void createAlertDialog(String errors) {
+    private void createAlertDialog(String errors) {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle("Warnings");
         alert.setMessage("Warnings :\n" + errors);
