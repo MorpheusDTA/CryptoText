@@ -32,7 +32,7 @@ import static java.lang.Math.abs;
 /**
  * @author DonatienTertrais
  */
-public class Conversation extends AppCompatActivity implements AdapterView.OnItemLongClickListener, ReceiveEventListener {
+public class Conversation extends AppCompatActivity implements AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
     private static final Level level = Level.WARNING;
     private static Logger logger = Logger.getLogger(Encryption.class.getName());
     private ArrayList<String> messages = new ArrayList<>();
@@ -65,6 +65,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         };
         smsListView.setAdapter(adapter);
         smsListView.setOnItemLongClickListener(this);
+        smsListView.setOnItemClickListener(this);
     }
 
     private ArrayList<Integer> getTypes() {
@@ -200,7 +201,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                //TODO delete SMS
+                //TODO delete SMS : need to be default app
                 //deleteSMS(body, date);
             }
         });
@@ -215,10 +216,8 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
-    public void onSmsReceived(ReceiveEvent e) {
-        if(e.getNumber().equals(phoneNumber)) {
-            loadMessages();
-        }
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        // TODO: decrypt/decrypt and save
     }
 
     /*private void deleteSMS(String body, String date) {

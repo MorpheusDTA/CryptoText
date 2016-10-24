@@ -56,8 +56,6 @@ public class SmsReceiver extends BroadcastReceiver {
 
             // Display SMS message
             Toast.makeText(context, toast, Toast.LENGTH_SHORT).show();
-            ReceiveEvent e = new ReceiveEvent(this, address);
-            e.notifyAll();
         }
 
         // this.abortBroadcast();
