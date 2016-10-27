@@ -1,9 +1,7 @@
 package com.example.utilisateur.cryptotext;
 
-import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -22,14 +20,13 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 
 import java.util.ArrayList;
 
 /**
  * @author DonatienTERTRAIS
  */
-public class MainActivity extends AppCompatActivity implements OnItemClickListener, OnItemLongClickListener {
+public class MainActivity extends AppCompatActivity implements OnItemClickListener {
     private ArrayList<String> conversationList = new ArrayList<>();
     private ArrayList<Integer> seenList = new ArrayList<>();
     public static String PHONE = "phoneNumber";
@@ -53,7 +50,6 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         };
         conversationsListView.setAdapter(adapter);
         conversationsListView.setOnItemClickListener(this);
-        conversationsListView.setOnItemLongClickListener(this);
     }
 
     public void setSeen(ArrayList<Integer> seen) {
@@ -141,27 +137,6 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         Intent intent = new Intent(this, ModifyConversation.class);
         intent.putExtra(PHONE, phoneNumber);
         startActivity(intent);
-    }
-
-    public boolean onItemLongClick( AdapterView<?> parent, View view, int pos, long id ) {
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Alert!!");
-        alert.setMessage("Are you sure to delete the conversation ?");
-        alert.setPositiveButton("YES", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // TODO delete the conversation
-                // dialog.dismiss();
-            }
-        });
-        alert.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        alert.show();
-        return true;
     }
 
     private String formatNumber(String phoneNumber) {

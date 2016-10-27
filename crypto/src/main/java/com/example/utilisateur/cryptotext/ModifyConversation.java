@@ -60,7 +60,6 @@ public class ModifyConversation extends AppCompatActivity {
     }
 
     public void goToConversation(View view) {
-        EditText phone = (EditText) findViewById(R.id.phone);
         /*EditText receptionKeySeed = (EditText) findViewById(R.id.RKeySeedField);
         EditText emissionKeySeed = (EditText) findViewById(R.id.EKeySeedField);
         EditText keyStoreField = (EditText) findViewById(R.id.passwordField);*/
@@ -100,16 +99,18 @@ public class ModifyConversation extends AppCompatActivity {
     }
 
     private void saveSeeds() {
-        EditText phone = (EditText) findViewById(R.id.phone);
-        EditText receptionKeySeed = (EditText) findViewById(R.id.RKeySeedField);
-        EditText emissionKeySeed = (EditText) findViewById(R.id.EKeySeedField);
-        EditText keyStoreField = (EditText) findViewById(R.id.passwordField);
-        String keyStorePassword = keyStoreField.getText().toString();
-        String emissionSeed = emissionKeySeed.getText().toString();
-        String receptionSeed = receptionKeySeed.getText().toString();
+        EditText receptionSeedField = (EditText) findViewById(R.id.RKeySeedField);
+        EditText emissionSeedField = (EditText) findViewById(R.id.EKeySeedField);
+        EditText passwordField = (EditText) findViewById(R.id.passwordField);
+        String password = passwordField.getText().toString();
+        String emissionSeed = emissionSeedField.getText().toString();
+        String receptionSeed = receptionSeedField.getText().toString();
 
-        KeyStore keyStore = Encryption.createKeyStore(keyStorePassword);
-        KeyStore.PasswordProtection passwordProtection = new KeyStore.PasswordProtection(keyStorePassword.toCharArray());
+        KeyStore keyStore = Encryption.createKeyStore(password);
+        /*if (keyStore == null) {
+            TODO : case of wrong password
+        }*/
+        KeyStore.PasswordProtection passwordProtection = new KeyStore.PasswordProtection(password.toCharArray());
         try {
             if (emissionSeed.length() != 0) {
                 KeyStore.SecretKeyEntry keyStoreEntry = new KeyStore.SecretKeyEntry(Encryption.generateKey(emissionSeed.getBytes()));
@@ -120,12 +121,13 @@ public class ModifyConversation extends AppCompatActivity {
                 keyStore.setEntry(phoneNumber + "In", keyStoreEntry, passwordProtection);
             }
         } catch (KeyStoreException e) {
-            logger.log(level, e.toString());// Keystore not loaded
+            logger.log(level, "KeyStore is not loaded/initialized: " + e.toString());
         }
 
         Intent intent = new Intent(this, Conversation.class);
         intent.putExtra(MainActivity.PHONE, phoneNumber);
-        intent.putExtra("keyStorePassword", keyStorePassword);
+        intent.putExtra("keyInSeed", receptionSeed);
+        intent.putExtra("keyOutSeed", emissionSeed);
         startActivity(intent);
     }
 

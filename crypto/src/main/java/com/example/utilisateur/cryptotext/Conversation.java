@@ -32,13 +32,15 @@ import static java.lang.Math.abs;
 /**
  * @author DonatienTertrais
  */
-public class Conversation extends AppCompatActivity implements AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
+public class Conversation extends AppCompatActivity implements AdapterView.OnItemClickListener {
     private static final Level level = Level.WARNING;
     private static Logger logger = Logger.getLogger(Encryption.class.getName());
     private ArrayList<String> messages = new ArrayList<>();
     private ArrayList<Integer> types = new ArrayList<>();
     private String phoneNumber = "";
     private String contactName = "Unknown";
+    private String emissionSeed = "";
+    private String receptionSeed = "";
 
     private ArrayList<String> getMessages() {
         return messages;
@@ -64,7 +66,6 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             }
         };
         smsListView.setAdapter(adapter);
-        smsListView.setOnItemLongClickListener(this);
         smsListView.setOnItemClickListener(this);
     }
 
@@ -82,16 +83,17 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         setContentView(R.layout.activity_conversation);
 
         TextView contact = (TextView) findViewById(R.id.contact);
-        //String keyStorePassword = "";
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if(extras != null) {
                 phoneNumber = extras.getString(MainActivity.PHONE);
-                //keyStorePassword = extras.getString("keyStorePassword");
+                emissionSeed = extras.getString("keyOutSeed");
+                receptionSeed = extras.getString("keyInSeed");
             }
         } else {
             phoneNumber = (String) savedInstanceState.getSerializable(MainActivity.PHONE);
-            //keyStorePassword = (String) savedInstanceState.getSerializable("keyStorePassword");
+            receptionSeed = (String) savedInstanceState.getSerializable("keyInSeed");
+            emissionSeed = (String) savedInstanceState.getSerializable("keyOutSeed");
         }
 
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
@@ -159,12 +161,12 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
         try {
             SmsManager smsManager = SmsManager.getDefault();
-            //TODO encrypting
+            //message = Encryption.decrypt( emissionSeed, message);
             smsManager.sendTextMessage(phoneNumber, null, message, null, null);
             Toast.makeText(getApplicationContext(), "SMS sent to " + contactName, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             Toast.makeText(getApplicationContext(), "SMS failed, please try again.", Toast.LENGTH_LONG).show();
-            e.printStackTrace();
+            logger.log(level, "Failed sending SMS: " + e.toString());
         }
 
         getTypes().add(0, 0);
@@ -190,42 +192,46 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        String txt = messages.get(position);
-        final String date = txt.substring(0, txt.indexOf("\n"));
-        final String body = txt.substring(txt.indexOf("\n"));
+    public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Alert!!");
-        alert.setMessage("Are you sure to delete the message from your phone ?\nThe message won't disappear from the contact's phone.");
-        alert.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+        alert.setTitle("Decryption");
+        alert.setMessage("Do you want to decrypt or decrypt and save ?");
+        alert.setPositiveButton("Decrypt", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                //TODO delete SMS : need to be default app
-                //deleteSMS(body, date);
+                //decrypt( position, false);
             }
         });
-        alert.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+        alert.setNegativeButton("Decrypt & Save (Impossible now)", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
+                //decrypt(position, true);
             }
         });
         alert.show();
-        return true;
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        // TODO: decrypt/decrypt and save
+    private void decrypt(int position, boolean doSave) {
+        String txt[] = messages.get(position).split("\n");
+        String seed = emissionSeed;
+        if (types.get(position) == 1) seed = receptionSeed;
+        String decrypted = Encryption.decrypt( seed, txt[1]);
+
+        if (doSave) {
+            // TODO : save decryption
+        }
+        messages.set(position, txt[0] + "\n" + decrypted);
+        setMessages(messages);
     }
 
-    /*private void deleteSMS(String body, String date) {
+    /*private void saveSMS(String encryptedBody, String body, String date) {
         try {
             Long id;
             Uri uriSms = Uri.parse("content://sms");
             Cursor c = getContentResolver().query(uriSms, new String[] {"_id", "date"},
-                    "address='" + phoneNumber + "' AND body='" + body + "'", null, null);
+                    "address='" + phoneNumber + "' AND body='" + encryptedBody + "'", null, null);
             if (c.moveToFirst()) {
                 boolean cond = abs(millisFromDate(date) - c.getLong(c.getColumnIndex("date"))) < 60000;
                 while (!cond) {

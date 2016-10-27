@@ -9,7 +9,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.telephony.SmsMessage;
-import android.view.InputEvent;
 import android.widget.Toast;
 import android.provider.Telephony.Sms.Intents;
 
@@ -28,11 +27,11 @@ public class SmsReceiver extends BroadcastReceiver {
 
 
     // Change the password here or give a user possibility to change it
-    public static final byte[] PASSWORD = new byte[]{ 0x20, 0x32, 0x34, 0x47, (byte) 0x84, 0x33, 0x58 };
+    //public static final byte[] PASSWORD = new byte[]{ 0x20, 0x32, 0x34, 0x47, (byte) 0x84, 0x33, 0x58 };
 
     public void onReceive( Context context, Intent intent ) {
         String toast = "";
-        String address = "";
+        String address;
 
         SmsMessage[] msgs = Intents.getMessagesFromIntent(intent);
         if ( msgs.length != 0) {
@@ -49,7 +48,7 @@ public class SmsReceiver extends BroadcastReceiver {
                     address = c.getString(c.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
                 }
                 c.close();
-                toast += "SMS from " + address + " :\n";
+                toast = "SMS from " + address + " :\n";
 
                 putSmsToDatabase( contentResolver, sms );
             }
