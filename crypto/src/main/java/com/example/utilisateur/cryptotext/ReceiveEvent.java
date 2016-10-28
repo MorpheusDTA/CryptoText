@@ -5,7 +5,7 @@ import java.util.EventObject;
 /**
  * @author DonatienTertrais
  */
-public class ReceiveEvent extends EventObject{
+class ReceiveEvent extends EventObject{
     private String number;
 
     public ReceiveEvent(Object source, String number) {

@@ -27,8 +27,6 @@ import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static java.lang.Math.abs;
-
 /**
  * @author DonatienTertrais
  */
@@ -41,7 +39,6 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     private String contactName = "Unknown";
     private String emissionSeed = "";
     private String receptionSeed = "";
-
     private ArrayList<String> getMessages() {
         return messages;
     }
@@ -177,51 +174,34 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         messageField.getText().clear();
     }
 
-    public String getDate(Long millis){
-        Calendar calendar = Calendar.getInstance();
-        if (millis != null) {
-            calendar.setTimeInMillis(millis);
-        }
-
-        int date = calendar.get(Calendar.DAY_OF_MONTH);
-        int year = calendar.get(Calendar.YEAR);
-        String month = new DateFormatSymbols().getMonths()[calendar.get(Calendar.MONTH)];
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        int minute = calendar.get(Calendar.MINUTE);
-        return month + " " + date + " " + year + " " + hour + ":" + minute;
-    }
-
     @Override
     public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle("Decryption");
-        alert.setMessage("Do you want to decrypt or decrypt and save ?");
+        alert.setMessage("Please, confirm decryption.");
         alert.setPositiveButton("Decrypt", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                //decrypt( position, false);
+                //decrypt( position );
+                //TODO : enablie saving a decryption
             }
         });
-        alert.setNegativeButton("Decrypt & Save (Impossible now)", new DialogInterface.OnClickListener() {
+        alert.setNegativeButton("Go Back", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                //decrypt(position, true);
             }
         });
         alert.show();
     }
 
-    private void decrypt(int position, boolean doSave) {
+    private void decrypt(int position) {
         String txt[] = messages.get(position).split("\n");
         String seed = emissionSeed;
         if (types.get(position) == 1) seed = receptionSeed;
         String decrypted = Encryption.decrypt( seed, txt[1]);
 
-        if (doSave) {
-            // TODO : save decryption
-        }
         messages.set(position, txt[0] + "\n" + decrypted);
         setMessages(messages);
     }
@@ -254,5 +234,19 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         cal.set(Integer.parseInt(infos[2]), Integer.parseInt(infos[0]), Integer.parseInt(infos[1]),
                 Integer.parseInt(infos[4].substring(0, ind)), Integer.parseInt(infos[4].substring(ind)));
         return cal.getTimeInMillis();
+    }
+
+    private String getDate(Long millis){
+        Calendar calendar = Calendar.getInstance();
+        if (millis != null) {
+            calendar.setTimeInMillis(millis);
+        }
+
+        int date = calendar.get(Calendar.DAY_OF_MONTH);
+        int year = calendar.get(Calendar.YEAR);
+        String month = new DateFormatSymbols().getMonths()[calendar.get(Calendar.MONTH)];
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+        return month + " " + date + " " + year + " " + hour + ":" + minute;
     }
 }

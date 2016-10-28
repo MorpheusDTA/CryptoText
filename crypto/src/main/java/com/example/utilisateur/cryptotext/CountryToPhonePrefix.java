@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by DonatienTERTRAIS on 14/09/2016.
+ * @author DonatienTERTRAIS
  */
-public class CountryToPhonePrefix {
+class CountryToPhonePrefix {
 
     private static Map<String, String> map = new HashMap<>();
 
-    public static String prefixFor(String iso2CountryCode) {
+    static String prefixFor(String iso2CountryCode) {
         String result = map.get(iso2CountryCode);
         if (result == null) {
             throw new IllegalArgumentException("Unknown country code " + iso2CountryCode);
