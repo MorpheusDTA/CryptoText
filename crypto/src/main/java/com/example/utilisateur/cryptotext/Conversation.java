@@ -164,8 +164,8 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             logger.log(level, "Failed sending SMS: " + e.toString());
         }
 
-        getTypes().add(0, 0);
-        getMessages().add(0, getDate(null) + "\n" + message);
+        getTypes().add(0);
+        getMessages().add(getDate((long) 0) + "\n" + message);
         setTypes(getTypes());
         setMessages(getMessages());
 
@@ -236,10 +236,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
     private String getDate(Long millis){
         Calendar calendar = Calendar.getInstance();
-        if (millis != null) {
-            calendar.setTimeInMillis(millis);
-        }
-
+        calendar.setTimeInMillis(millis);
         int date = calendar.get(Calendar.DAY_OF_MONTH);
         int year = calendar.get(Calendar.YEAR);
         String month = new DateFormatSymbols().getMonths()[calendar.get(Calendar.MONTH)];

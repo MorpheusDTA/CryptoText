@@ -66,9 +66,11 @@ public class ModifyConversation extends AppCompatActivity {
         /*String emissionSeed = emissionKeySeed.getText().toString();
         String receptionSeed = receptionKeySeed.getText().toString();
         String keyStorePassword = keyStoreField.getText().toString();*/
+        EditText phone = (EditText) findViewById(R.id.phone);
+        phoneNumber = formatNumber(phone.getText().toString());
 
         Intent intent = new Intent(this, Conversation.class);
-        intent.putExtra(MainActivity.PHONE, formatNumber(phoneNumber));
+        intent.putExtra(MainActivity.PHONE, phoneNumber);
         //intent.putExtra("keyStorePassword", keyStorePassword);
         startActivity(intent);
 
