@@ -99,17 +99,17 @@ public class ModifyConversation extends AppCompatActivity {
     }
 
     private void saveSeeds() {
-        EditText receptionSeedField = (EditText) findViewById(R.id.RKeySeedField);
-        EditText emissionSeedField = (EditText) findViewById(R.id.EKeySeedField);
-        EditText passwordField = (EditText) findViewById(R.id.passwordField);
-        String password = passwordField.getText().toString();
-        String emissionSeed = emissionSeedField.getText().toString();
-        String receptionSeed = receptionSeedField.getText().toString();
+        EditText fields[] = new EditText[] {(EditText) findViewById(R.id.RKeySeedField), (EditText) findViewById(R.id.EKeySeedField),
+                (EditText) findViewById(R.id.passwordField)};
+        String password = fields[2].getText().toString();
+        String emissionSeed = fields[1].getText().toString();
+        String receptionSeed = fields[0].getText().toString();
 
         KeyStore keyStore = Encryption.createKeyStore(password);
-        /*if (keyStore == null) {
-            TODO : case of wrong password
-        }*/
+        if (keyStore == null) {
+            wrongPassword();
+            return;
+        }
         KeyStore.PasswordProtection passwordProtection = new KeyStore.PasswordProtection(password.toCharArray());
         try {
             if (emissionSeed.length() != 0) {
@@ -158,5 +158,18 @@ public class ModifyConversation extends AppCompatActivity {
             phoneNumber = "+" + CountryToPhonePrefix.prefixFor(iso.toUpperCase()) + phoneNumber;
         }
         return PhoneNumberUtils.formatNumberToE164(phoneNumber, iso);
+    }
+
+    private void wrongPassword() {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle("Wrong Password");
+        alert.setMessage("The given password doesn't match with the KeyStore password");
+        alert.setNegativeButton("Go Back", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        alert.show();
     }
 }

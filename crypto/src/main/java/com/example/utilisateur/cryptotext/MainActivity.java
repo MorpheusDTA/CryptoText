@@ -22,14 +22,18 @@ import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author DonatienTERTRAIS
  */
 public class MainActivity extends AppCompatActivity implements OnItemClickListener {
-    private ArrayList<String> conversationList = new ArrayList<>();
-    private ArrayList<Integer> seenList = new ArrayList<>();
     public static String PHONE = "phoneNumber";
+    private static final Level level = Level.WARNING;
+    private ArrayList<Integer> seenList = new ArrayList<>();
+    private ArrayList<String> conversationList = new ArrayList<>();
+    private static Logger logger = Logger.getLogger(Encryption.class.getName());
 
     public void setConversationList(ArrayList<String> conversationList) {
         this.conversationList = conversationList;
@@ -93,26 +97,29 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         ArrayList<String> conversations = new ArrayList<>();
         ArrayList<String> numbers = new ArrayList<>();
         final ArrayList<Integer> seen = new ArrayList<>();
+
         ContentResolver contentResolver = getContentResolver();
         Cursor cursor = contentResolver.query(Uri.parse("content://sms/"), new String[]{"address", "seen", "body"}, null, null, null);
+        if (cursor == null) {
+            logger.log(level, "Null Cursor on getting the text messages.");
+            return;
+        }
         int indexAddress = cursor.getColumnIndex("address");
         int indexSeen = cursor.getColumnIndex("seen");
 
-        if ( cursor.getColumnIndex( "body" ) < 0 || !cursor.moveToFirst() ) return;
+        boolean nextCursor = cursor.moveToFirst();
+        if ( cursor.getColumnIndex( "body" ) < 0 || !nextCursor ) return;
 
-        conversations.clear();
-        seen.add(cursor.getInt(indexSeen));
-        numbers.add(formatNumber(cursor.getString(indexAddress)));
-        String str = "Conversation: " + getContactName(cursor.getString( indexAddress ), contentResolver) + "\n" + cursor.getString(indexAddress) ;
-        conversations.add(str);
-
-        while( cursor.moveToNext() ){
-            if ( !numbers.contains(formatNumber(cursor.getString(indexAddress)))) {
+        String str;
+        String number;
+        while( nextCursor ){
+            if (!cursor.isNull(indexAddress) && !numbers.contains(number = formatNumber(cursor.getString(indexAddress)))){// Not a draft
                 seen.add(cursor.getInt(indexSeen));
-                numbers.add(cursor.getString(indexAddress));
-                str = "Conversation: " + getContactName(cursor.getString( indexAddress ), contentResolver) + "\n" + cursor.getString(indexAddress);
+                numbers.add(number);
+                str = "Conversation: " + getContactName(number, contentResolver) + "\n" + number;
                 conversations.add(str);
             }
+            nextCursor = cursor.moveToNext();
         }
         numbers.clear();
         setConversationList(conversations);

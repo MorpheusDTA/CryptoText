@@ -20,7 +20,8 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:weightSum="1">
+        android:weightSum="1"
+        android:id="@+id/linearLayout">
 
         <TextView
             android:layout_width="match_parent"
@@ -35,13 +36,15 @@
             android:id="@+id/smsList"
             android:layout_weight="0.84"
             android:stackFromBottom="true"
+            android:dividerHeight="10dp"
+            android:divider="@android:color/transparent"
             android:transcriptMode="alwaysScroll" />
 
         <EditText
             android:layout_height="wrap_content"
             android:id="@+id/message"
             android:hint="@string/message"
-            android:layout_width="282dp"
+            android:layout_width="291dp"
             android:layout_weight="0.05"
             android:enabled="true" />
 

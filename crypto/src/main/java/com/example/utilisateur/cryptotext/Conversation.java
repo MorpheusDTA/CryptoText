@@ -10,13 +10,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,21 +34,22 @@ import java.util.logging.Logger;
  * @author DonatienTertrais
  */
 public class Conversation extends AppCompatActivity implements AdapterView.OnItemClickListener {
-    private static final Level level = Level.WARNING;
-    private static Logger logger = Logger.getLogger(Encryption.class.getName());
-    private ArrayList<String> messages = new ArrayList<>();
-    private ArrayList<Integer> types = new ArrayList<>();
     private String phoneNumber = "";
-    private String contactName = "Unknown";
     private String emissionSeed = "";
     private String receptionSeed = "";
-    private ArrayList<String> getMessages() {
-        return messages;
-    }
+    private String contactName = "Unknown";
+    private static final Level level = Level.WARNING;
+    private ArrayList<Integer> types = new ArrayList<>();
+    private ArrayList<String> messages = new ArrayList<>();
+    private static Logger logger = Logger.getLogger(Encryption.class.getName());
 
+    private ArrayList<String> getMessages() {
+        return this.messages;
+    }
     private void setMessages(ArrayList<String> messages) {
         this.messages = messages;
         ListView smsListView = (ListView) findViewById( R.id.smsList );
+
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, this.messages) {
             @Override
             @NonNull
@@ -65,13 +69,40 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         smsListView.setAdapter(adapter);
         smsListView.setOnItemClickListener(this);
     }
-
     private ArrayList<Integer> getTypes() {
         return types;
     }
-
     private void setTypes(ArrayList<Integer> types) {
         this.types = types;
+    }
+    private void setMessagesAndTypes(Cursor cursor){
+        types.clear();
+        messages.clear();
+        ArrayList<String> mess = new ArrayList<>();
+        final ArrayList<Integer> type = new ArrayList<>();
+
+        int indexes[] = new int[]{cursor.getColumnIndex("date"), cursor.getColumnIndex("body"),
+                cursor.getColumnIndex("type"), cursor.getColumnIndex("seen"), cursor.getColumnIndex("_id")};
+
+        boolean nextCursor = cursor.moveToFirst();
+        if ( indexes[1] < 0 || !nextCursor ) return;
+
+        String message;
+        while( nextCursor ){
+            message = getDate(cursor.getLong(indexes[0])) + "\n" + cursor.getString(indexes[1]);
+            if (cursor.getInt(indexes[3]) == 0) {
+                ContentValues values = new ContentValues();
+                values.put("read",true);
+                getContentResolver().update(Uri.parse("content://sms/inbox"),values,
+                        "_id="+cursor.getString(indexes[4]), null);
+            }
+            type.add(0, cursor.getInt(indexes[2]));
+            mess.add(0, message);
+            nextCursor = cursor.moveToNext();
+        }
+
+        setTypes(type);
+        setMessages(mess);
     }
 
     @Override
@@ -107,47 +138,14 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void loadMessages () {
-        types.clear();
-        messages.clear();
-        ArrayList<String> mess = new ArrayList<>();
-        final ArrayList<Integer> type = new ArrayList<>();
-
         ContentResolver contentResolver = getContentResolver();
         Cursor cursor = contentResolver.query(Uri.parse("content://sms/"), new String[]{"_id", "body", "date", "type", "seen"},
                 "address='" + phoneNumber + "'", null, null);
-        int indexDate = cursor.getColumnIndex("date");
-        int indexBody = cursor.getColumnIndex("body");
-        int indexType = cursor.getColumnIndex("type");
-        int indexSeen = cursor.getColumnIndex("seen");
-        int indexId = cursor.getColumnIndex("_id");
-
-        if ( indexBody < 0 || !cursor.moveToFirst() ) return;
-
-        String message;
-        message = getDate(cursor.getLong(indexDate)) + "\n" + cursor.getString(indexBody);
-        if (cursor.getInt(indexSeen) == 0) {
-            ContentValues values = new ContentValues();
-            values.put("read",true);
-            getContentResolver().update(Uri.parse("content://sms/inbox"),values,
-                    "_id="+cursor.getString(indexId), null);
+        if (cursor == null) {
+            logger.log(level, "Null Cursor on getting the text messages.");
+            return;
         }
-        type.add(0, cursor.getInt(indexType));
-        mess.add(0, message);
-
-        while( cursor.moveToNext() ){
-            message = getDate(cursor.getLong(indexDate)) + "\n" + cursor.getString(indexBody);
-            if (cursor.getInt(indexSeen) == 0) {
-                ContentValues values = new ContentValues();
-                values.put("read",true);
-                getContentResolver().update(Uri.parse("content://sms/inbox"),values,
-                        "_id="+cursor.getString(indexId), null);
-            }
-            type.add(0, cursor.getInt(indexType));
-            mess.add(0, message);
-        }
-
-        setTypes(type);
-        setMessages(mess);
+        setMessagesAndTypes(cursor);
         cursor.close();
     }
 

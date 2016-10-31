@@ -27,14 +27,13 @@ import javax.crypto.spec.SecretKeySpec;
  * @author DonatienTERTRAIS
  */
 
-//The keys are stocked in a file, this file is protected with a password which is to be given every time a key is used (before openning and creating a conversation
-
-
+//The keys are stocked in a file, this file is protected with a password which is to be given every time a key is used
+//(before openning and creating a conversation
 
 class Encryption {
-    private static final String keyStoreFile = "/storage/emulated/CryptoText/keys.keystore";
     private static final Level level = Level.WARNING;
     private static Logger logger = Logger.getLogger(Encryption.class.getName());
+    private static final String keyStoreFile = "/storage/emulated/CryptoText/keys.keystore";
 
     static KeyStore createKeyStore(String filePassword) {
         File file = new File(keyStoreFile);
