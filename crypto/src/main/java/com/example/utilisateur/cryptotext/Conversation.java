@@ -14,6 +14,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -54,16 +55,41 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             @Override
             @NonNull
             public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+                LayoutInflater inflater = LayoutInflater.from(getContext());
+
                 View row = super.getView(position, convertView, parent);
                 // Background color depends on whether the sms is sent/received
                 if (types.get(position) == 1) {
+                    convertView = inflater.inflate(R.layout.activity_conversation_received, null);
                     row.setBackgroundColor(Color.rgb(255, 255, 102));// yellow, received
                     row.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
                 } else {
+                    convertView = inflater.inflate(R.layout.activity_conversation_sent, null);
                     row.setBackgroundColor(Color.rgb(153, 204, 255));// blue, sent
                     row.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
                 }
                 return row;
+
+                /*
+                 ViewHolder holder;
+
+                 if (convertView == null) {
+                    if (list.get(position).getTypeOfSms().equals("send")) {
+                        convertView     = myInflater.inflate(R.layout.raw_left, null);
+                    else {
+                        convertView     = myInflater.inflate(R.layout.raw_right, null);
+                        holder          = new ViewHolder();
+                        holder.message      = (TextView) convertView.findViewById(R.id.message);
+                        holder.dateAndTime      = (TextView) convertView.findViewById(R.id.dataAndTime);
+                        convertView.setTag(holder);
+                } else {
+                    holder = (ViewHolder) convertView.getTag();
+                }
+                holder.message.setText(list.get(position).getMessageContent());
+                holder.dateAndTime.setText(list.get(position).geTime()+list.get(position).getDate());
+
+                return convertView;
+                 */
             }
         };
         smsListView.setAdapter(adapter);
@@ -81,6 +107,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         ArrayList<String> mess = new ArrayList<>();
         final ArrayList<Integer> type = new ArrayList<>();
 
+        // Index de différentes infos sur le sms
         int indexes[] = new int[]{cursor.getColumnIndex("date"), cursor.getColumnIndex("body"),
                 cursor.getColumnIndex("type"), cursor.getColumnIndex("seen"), cursor.getColumnIndex("_id")};
 
@@ -88,11 +115,11 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         if ( indexes[1] < 0 || !nextCursor ) return;
 
         String message;
-        while( nextCursor ){
+        while( nextCursor ){ // Lecture des sms du cursor, modification pour le cas de sms non vu TODO mal fait ?
             message = getDate(cursor.getLong(indexes[0])) + "\n" + cursor.getString(indexes[1]);
             if (cursor.getInt(indexes[3]) == 0) {
                 ContentValues values = new ContentValues();
-                values.put("read",true);
+                values.put("seen",1);
                 getContentResolver().update(Uri.parse("content://sms/inbox"),values,
                         "_id="+cursor.getString(indexes[4]), null);
             }

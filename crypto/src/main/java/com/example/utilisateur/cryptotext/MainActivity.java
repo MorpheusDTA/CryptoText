@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     private ArrayList<Integer> seenList = new ArrayList<>();
     private ArrayList<String> conversationList = new ArrayList<>();
     private static Logger logger = Logger.getLogger(Encryption.class.getName());
+    private SmsReceiver smsReceiver;
 
     public void setConversationList(ArrayList<String> conversationList) {
         this.conversationList = conversationList;
@@ -56,12 +57,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         conversationsListView.setOnItemClickListener(this);
     }
 
-    public void setSeen(ArrayList<Integer> seen) {
-        this.seenList = seen;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        smsReceiver = new SmsReceiver(this.getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         update();
@@ -91,45 +89,55 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Update the conversations list
+     */
     public void update() {
         seenList.clear();
         conversationList.clear();
-        ArrayList<String> conversations = new ArrayList<>();
-        ArrayList<String> numbers = new ArrayList<>();
-        final ArrayList<Integer> seen = new ArrayList<>();
+        ArrayList<String> conversations = new ArrayList<>();// List of conversations
+        ArrayList<String> numbers = new ArrayList<>();// List of phone numbers of the conversations
+        final ArrayList<Integer> seen = new ArrayList<>();// To know whether a conversation contains unresd sms or not
 
+        // Get the messages with the address/seen/body fields
         ContentResolver contentResolver = getContentResolver();
         Cursor cursor = contentResolver.query(Uri.parse("content://sms/"), new String[]{"address", "seen", "body"}, null, null, null);
         if (cursor == null) {
             logger.log(level, "Null Cursor on getting the text messages.");
             return;
         }
+        // Indexes of the fields
         int indexAddress = cursor.getColumnIndex("address");
         int indexSeen = cursor.getColumnIndex("seen");
+
 
         boolean nextCursor = cursor.moveToFirst();
         if ( cursor.getColumnIndex( "body" ) < 0 || !nextCursor ) return;
 
-        String str;
         String number;
-        while( nextCursor ){
-            if (!cursor.isNull(indexAddress) && !numbers.contains(number = formatNumber(cursor.getString(indexAddress)))){// Not a draft
+        while( nextCursor ){// See all the sms
+            if (!cursor.isNull(indexAddress) && !numbers.contains(number = formatNumber(cursor.getString(indexAddress)))){// Not a draft and the phone number not already listed => new conversation
                 seen.add(cursor.getInt(indexSeen));
                 numbers.add(number);
-                str = "Conversation: " + getContactName(number, contentResolver) + "\n" + number;
-                conversations.add(str);
+                conversations.add( "Conversation: " + getContactName(number) + "\n" + number );
             }
             nextCursor = cursor.moveToNext();
         }
         numbers.clear();
         setConversationList(conversations);
-        setSeen(seen);
+        seenList = seen;
         cursor.close();
     }
 
-    public String getContactName(String phoneNumber, ContentResolver cr){
+    /**
+     * Get contact name from a phone number
+     *
+     * @param phoneNumber Phone number
+     * @return Contact name
+     */
+    public String getContactName(String phoneNumber){
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
-        Cursor cursor = cr.query(uri, new String[]{ContactsContract.Data.DISPLAY_NAME}, null, null, null);
+        Cursor cursor = getContentResolver().query(uri, new String[]{ContactsContract.Data.DISPLAY_NAME}, null, null, null);
         String contactName = "";
         if (cursor != null && cursor.moveToFirst()) {
             contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
@@ -139,6 +147,14 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     }
     //The SMS text is obtained from the list, decrypted and then shown. SmsReceiver.PASSWORD can be changed in any way. The list item listener is as follows:
 
+    /**
+     * When a coversation is clicked, go to the ModifyConversation Activity
+     *
+     * @param parent The AdapterView where the click happened.
+     * @param view The view within the AdapterView that was clicked (this will be a view provided by the adapter)
+     * @param pos The position of the view in the adapter.
+     * @param id The row id of the item that was clicked.
+     */
     public void onItemClick( AdapterView<?> parent, View view, int pos, long id ) {
         String phoneNumber = conversationList.get(pos).split("\n")[1];
         Intent intent = new Intent(this, ModifyConversation.class);
@@ -146,6 +162,12 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         startActivity(intent);
     }
 
+    /**
+     * Formatting the phone Number to the Sim Country ISO Standard
+     *
+     * @param phoneNumber Phone Number to be formatted
+     * @return Formatted phone number
+     */
     private String formatNumber(String phoneNumber) {
         TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         String iso = tm.getSimCountryIso();
