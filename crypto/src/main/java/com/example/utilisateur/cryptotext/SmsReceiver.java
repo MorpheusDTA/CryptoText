@@ -36,7 +36,6 @@ public class SmsReceiver extends BroadcastReceiver {
     //public static final byte[] PASSWORD = new byte[]{ 0x20, 0x32, 0x34, 0x47, (byte) 0x84, 0x33, 0x58 };
 
 
-
     /*@Override
     public void onReceive( Context context, Intent intent ) {
         String address;
