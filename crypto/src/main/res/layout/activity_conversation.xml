@@ -40,7 +40,7 @@
             android:id="@+id/smsList"
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight="1"
+            android:layout_weight="0.86"
             android:dividerHeight="10dp"
             android:stackFromBottom="true"
             android:divider="@android:color/transparent"/>
@@ -50,7 +50,7 @@
             android:id="@+id/message"
             android:hint="@string/message"
             android:layout_width="291dp"
-            android:layout_weight="0.05"
+            android:layout_weight="0.04"
             android:enabled="true" />
 
     </LinearLayout>

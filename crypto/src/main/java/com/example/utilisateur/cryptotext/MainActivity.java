@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     private ArrayList<Integer> seenList = new ArrayList<>();
     private ArrayList<String> conversationList = new ArrayList<>();
     private static Logger logger = Logger.getLogger(Encryption.class.getName());
-    private SmsReceiver smsReceiver;
 
     public void setConversationList(ArrayList<String> conversationList) {
         this.conversationList = conversationList;
@@ -59,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        smsReceiver = new SmsReceiver(this.getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         update();
