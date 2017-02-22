@@ -10,17 +10,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -183,7 +180,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
         try {
             SmsManager smsManager = SmsManager.getDefault();
-            //message = Encryption.decrypt( emissionSeed, message);
+            message = Encryption.encrypt(emissionSeed, message);
             smsManager.sendTextMessage(phoneNumber, null, message, null, null);
             Toast.makeText(getApplicationContext(), "SMS sent to " + contactName, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
@@ -208,7 +205,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                //decrypt( position );
+                decrypt( position );
                 //TODO : enablie saving a decryption
             }
         });
@@ -222,12 +219,15 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     }
 
     private void decrypt(int position) {
-        String txt[] = messages.get(position).split("\n");
+        String txt = messages.get(position);
+        int idx = txt.indexOf("\n");
+        String date = txt.substring(0, idx);
+        String message = txt.substring(idx + 1);
         String seed = emissionSeed;
         if (types.get(position) == 1) seed = receptionSeed;
-        String decrypted = Encryption.decrypt( seed, txt[1]);
+        String decrypted = Encryption.decrypt( seed, message);
 
-        messages.set(position, txt[0] + "\n" + decrypted);
+        messages.set(position, date + "\n" + decrypted);
         setMessages(messages);
     }
 
