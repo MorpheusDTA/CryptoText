@@ -13,6 +13,7 @@ import android.provider.Telephony;
 import android.telephony.SmsMessage;
 import android.widget.Toast;
 import android.provider.Telephony.Sms.Intents;
+import android.provider.Telephony.TextBasedSmsColumns;
 
 
 /**
@@ -21,9 +22,6 @@ import android.provider.Telephony.Sms.Intents;
 public class SmsReceiver extends BroadcastReceiver {
     public static String PHONE = "phoneNumber";
     private Context context;
-
-    public static final int MESSAGE_TYPE_INBOX = 1;
-    public static final int MESSAGE_TYPE_SENT = 2;
 
     public static final int MESSAGE_IS_NOT_READ = 0;
     public static final int MESSAGE_IS_READ = 1;
@@ -74,7 +72,7 @@ public class SmsReceiver extends BroadcastReceiver {
         values.put( "date", sms.getTimestampMillis());
         values.put( "read", false);
         values.put( "status", sms.getStatus());
-        values.put( "type", MESSAGE_TYPE_INBOX);
+        values.put( "type", TextBasedSmsColumns.MESSAGE_TYPE_INBOX);
         values.put( "seen", MESSAGE_IS_NOT_SEEN);
         values.put( "body", sms.getMessageBody());
         /*try {

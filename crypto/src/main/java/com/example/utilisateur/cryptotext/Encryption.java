@@ -118,7 +118,7 @@ class Encryption {
             keyGenerator = KeyGenerator.getInstance( "AES" );
             secureRandom = SecureRandom.getInstance( "SHA1PRNG" );
             secureRandom.setSeed( seed );
-            keyGenerator.init( 128, secureRandom );
+            keyGenerator.init( 256, secureRandom );
             return keyGenerator.generateKey();
         } catch (NoSuchAlgorithmException e) {
             logger.log(level, "Unknown algorithm for key/random number generation: " + e.toString());

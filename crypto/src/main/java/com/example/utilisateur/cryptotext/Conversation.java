@@ -180,20 +180,19 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
         try {
             SmsManager smsManager = SmsManager.getDefault();
-            message = Encryption.encrypt(emissionSeed, message);
+            //message = Encryption.encrypt(emissionSeed, message);
             smsManager.sendTextMessage(phoneNumber, null, message, null, null);
             Toast.makeText(getApplicationContext(), "SMS sent to " + contactName, Toast.LENGTH_LONG).show();
+            getTypes().add(0);
+            getMessages().add(getDate((long) 0) + "\n" + message);
+            setTypes(getTypes());
+            setMessages(getMessages());
+
+            messageField.getText().clear();
         } catch (Exception e) {
             Toast.makeText(getApplicationContext(), "SMS failed, please try again.", Toast.LENGTH_LONG).show();
             logger.log(level, "Failed sending SMS: " + e.toString());
         }
-
-        getTypes().add(0);
-        getMessages().add(getDate((long) 0) + "\n" + message);
-        setTypes(getTypes());
-        setMessages(getMessages());
-
-        messageField.getText().clear();
     }
 
     @Override
@@ -205,7 +204,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                decrypt( position );
+                //decrypt( position );
                 //TODO : enablie saving a decryption
             }
         });
