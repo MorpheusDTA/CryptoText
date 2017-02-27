@@ -12,11 +12,11 @@ import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -32,9 +32,8 @@ import java.util.logging.Logger;
  * @author DonatienTertrais
  */
 public class Conversation extends AppCompatActivity implements AdapterView.OnItemClickListener {
+    private String keyStorePassword = "";
     private String phoneNumber = "";
-    private String emissionSeed = "";
-    private String receptionSeed = "";
     private String contactName = "Unknown";
     private static final Level level = Level.WARNING;
     private ArrayList<Integer> types = new ArrayList<>();
@@ -52,16 +51,16 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             @Override
             @NonNull
             public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-                LayoutInflater inflater = LayoutInflater.from(getContext());
+                //LayoutInflater inflater = LayoutInflater.from(getContext());
 
                 View row = super.getView(position, convertView, parent);
                 // Background color depends on whether the sms is sent/received
                 if (types.get(position) == 1) {
-                    convertView = inflater.inflate(R.layout.activity_conversation_received, null);
+                    //convertView = inflater.inflate(R.layout.activity_conversation_received, null);
                     row.setBackgroundColor(Color.rgb(255, 255, 102));// yellow, received
                     row.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
                 } else {
-                    convertView = inflater.inflate(R.layout.activity_conversation_sent, null);
+                    //convertView = inflater.inflate(R.layout.activity_conversation_sent, null);
                     row.setBackgroundColor(Color.rgb(153, 204, 255));// blue, sent
                     row.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
                 }
@@ -95,9 +94,11 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     private ArrayList<Integer> getTypes() {
         return types;
     }
-    private void setTypes(ArrayList<Integer> types) {
-        this.types = types;
-    }
+
+    /**
+     * Sets the lists of messages and their types
+     * @param cursor Cursor used to search the text messages
+     */
     private void setMessagesAndTypes(Cursor cursor){
         types.clear();
         messages.clear();
@@ -112,7 +113,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         if ( indexes[1] < 0 || !nextCursor ) return;
 
         String message;
-        while( nextCursor ){ // Lecture des sms du cursor, modification pour le cas de sms non vu TODO mal fait ?
+        while( nextCursor ){ // Lecture des sms du cursor, modification pour le cas de sms non vu
             message = getDate(cursor.getLong(indexes[0])) + "\n" + cursor.getString(indexes[1]);
             if (cursor.getInt(indexes[3]) == 0) {
                 ContentValues values = new ContentValues();
@@ -125,7 +126,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             nextCursor = cursor.moveToNext();
         }
 
-        setTypes(type);
+        this.types = type;
         setMessages(mess);
     }
 
@@ -133,7 +134,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
-        String keyStorePassword = "";
+        //CheckBox checkEncryption = (CheckBox) findViewById(R.id.checkEncryption);
 
         TextView contact = (TextView) findViewById(R.id.contact);
         if (savedInstanceState == null) {
@@ -147,7 +148,12 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             keyStorePassword = (String) savedInstanceState.getSerializable("keyStorePassword");
         }
 
-        //TODO check if there is an outgoing seed, to check/uncheck encryption
+        if (Encryption.isStocked(phoneNumber + "Out", keyStorePassword)) {
+            //checkEncryption.setChecked(true);
+        } else {
+            //checkEncryption.setChecked(false);
+            //checkEncryption.setEnabled(false);
+        }
 
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
         Cursor cursor = getContentResolver().query(uri, new String[]{ContactsContract.Data.DISPLAY_NAME}, null, null, null);
@@ -162,6 +168,9 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         loadMessages();
     }
 
+    /**
+     * Loads the messages from the database
+     */
     public void loadMessages () {
         ContentResolver contentResolver = getContentResolver();
         Cursor cursor = contentResolver.query(Uri.parse("content://sms/"), new String[]{"_id", "body", "date", "type", "seen"},
@@ -174,20 +183,30 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         cursor.close();
     }
 
+    /**
+     * Sending sms
+     *
+     * @param view View of the floating action button
+     */
     public void send (View view) {
-        // Sending SMS
+        CheckBox checkEncryption = (CheckBox) findViewById(R.id.checkEncryption);
         EditText messageField = (EditText) findViewById(R.id.message);
         String message = messageField.getText().toString();
 
         try {
             SmsManager smsManager = SmsManager.getDefault();
-
-            //message = Encryption.encrypt(emissionSeed, message);
+            if (Encryption.isStocked(phoneNumber + "Out", keyStorePassword) && checkEncryption.isChecked()) {
+                // If a key isStocked and encryption asked, the message is encrypted
+                String key = Encryption.getKey(phoneNumber + "Out", keyStorePassword);
+                message = Encryption.encrypt(key, message);
+            }
+            //Send SMS
             smsManager.sendTextMessage(phoneNumber, null, message, null, null);
             Toast.makeText(getApplicationContext(), "SMS sent to " + contactName, Toast.LENGTH_LONG).show();
+            // Update the view
             getTypes().add(0);
             getMessages().add(getDate((long) 0) + "\n" + message);
-            setTypes(getTypes());
+            this.types = getTypes();
             setMessages(getMessages());
 
             messageField.getText().clear();
@@ -206,8 +225,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                //decrypt( position );
-                //TODO : enablie saving a decryption
+                decrypt( position );
             }
         });
         alert.setNegativeButton("Go Back", new DialogInterface.OnClickListener() {
@@ -219,16 +237,25 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         alert.show();
     }
 
+    /**
+     * Decryption of the sms on the given position of the list
+     * @param position Position of the SMS in the list
+     */
     private void decrypt(int position) {
         String txt = messages.get(position);
         int idx = txt.indexOf("\n");
         String date = txt.substring(0, idx);
         String message = txt.substring(idx + 1);
-        String seed = emissionSeed;
-        if (types.get(position) == 1) seed = receptionSeed;
-        String decrypted = Encryption.decrypt( seed, message);
 
-        messages.set(position, date + "\n" + decrypted);
+        String key = "";
+        if (types.get(position) == 1 && Encryption.isStocked(phoneNumber + "In", keyStorePassword)) {
+            key = Encryption.getKey(phoneNumber + "In", keyStorePassword);
+        } else if (types.get(position) == 2 && Encryption.isStocked(phoneNumber + "Out", keyStorePassword)) {
+            key = Encryption.getKey(phoneNumber + "Out", keyStorePassword);
+        };
+        message = Encryption.decrypt(key, message);
+
+        messages.set(position, date + "\n" + message);
         setMessages(messages);
     }
 

@@ -15,8 +15,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,6 +22,9 @@ import java.util.logging.Logger;
  * @author DonatienTertrais
  */
 public class ModifyConversation extends AppCompatActivity {
+    private static final int WRONG_PASSWORD = 2;
+    private static final int EXIT_SUCCESS = 1;
+    private static final int ERROR_ON_ACTION = 0;
     private String phoneNumber;
     private static final Level level = Level.WARNING;
     private static Logger logger = Logger.getLogger(Encryption.class.getName());
@@ -45,6 +46,9 @@ public class ModifyConversation extends AppCompatActivity {
         }
     }
 
+    /**
+     * Sets the phone and contact fields with the adequate values
+     */
     private void setPhoneAndContact(){
         TextView contact = (TextView) findViewById(R.id.contactName);
         EditText phone = (EditText) findViewById(R.id.phone);
@@ -59,7 +63,11 @@ public class ModifyConversation extends AppCompatActivity {
         }
     }
 
-    public void goToConversation(View view) {
+    /**
+     * Go to the chosen conversation
+     * @param view View of the button clicked
+     */
+    private void goToConversation(View view) {
         EditText phone = (EditText) findViewById(R.id.phone);
         EditText keyStoreField = (EditText) findViewById(R.id.passwordField);
         String keyStorePassword = keyStoreField.getText().toString();
@@ -72,6 +80,7 @@ public class ModifyConversation extends AppCompatActivity {
         intent.putExtra("keyStorePassword", keyStorePassword);
         startActivity(intent);
 
+        //TODO check if ther are errors
         /*String errors = "";
         if (phoneNumber.isEmpty()) {
             errors = errors + "The phone number isn't correct\n";
@@ -98,39 +107,32 @@ public class ModifyConversation extends AppCompatActivity {
         }*/
     }
 
-    private void saveSeeds() {
+    /**
+     * Save the Keys
+     */
+    private void saveKeys() {
         EditText fields[] = new EditText[] {(EditText) findViewById(R.id.RKeySeedField), (EditText) findViewById(R.id.EKeySeedField),
                 (EditText) findViewById(R.id.passwordField)};
         String password = fields[2].getText().toString();
         String emissionSeed = fields[1].getText().toString();
         String receptionSeed = fields[0].getText().toString();
-
-        KeyStore keyStore = Encryption.createKeyStore(password);
-        if (keyStore == null) {
-            wrongPassword();
-            return;
-        }
-        KeyStore.PasswordProtection passwordProtection = new KeyStore.PasswordProtection(password.toCharArray());
-        try {
-            if (emissionSeed.length() != 0) {
-                KeyStore.SecretKeyEntry keyStoreEntry = new KeyStore.SecretKeyEntry(Encryption.generateKey(emissionSeed.getBytes()));
-                keyStore.setEntry(phoneNumber + "Out", keyStoreEntry, passwordProtection);
-            }
-            if (receptionSeed.length() != 0) {
-                KeyStore.SecretKeyEntry keyStoreEntry = new KeyStore.SecretKeyEntry(Encryption.generateKey(receptionSeed.getBytes()));
-                keyStore.setEntry(phoneNumber + "In", keyStoreEntry, passwordProtection);
-            }
-        } catch (KeyStoreException e) {
-            logger.log(level, "KeyStore is not loaded/initialized: " + e.toString());
+        int a = Encryption.saveKey(emissionSeed, password, phoneNumber + "Out");
+        if (a == WRONG_PASSWORD || a == ERROR_ON_ACTION) {
+            error();
+        } else {
+            Encryption.saveKey(receptionSeed, password, phoneNumber + "In");
         }
 
         Intent intent = new Intent(this, Conversation.class);
         intent.putExtra(MainActivity.PHONE, phoneNumber);
-        intent.putExtra("keyInSeed", receptionSeed);
-        intent.putExtra("keyOutSeed", emissionSeed);
+        intent.putExtra("keyStorePassword", password);
         startActivity(intent);
     }
 
+    /**
+     * Create alert window when there are some errors
+     * @param errors Detected errors
+     */
     private void createAlertDialog(String errors) {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle("Warnings");
@@ -139,7 +141,7 @@ public class ModifyConversation extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                saveSeeds();
+                saveKeys();
             }
         });
         alert.setNegativeButton("Go Back", new DialogInterface.OnClickListener() {
@@ -151,6 +153,11 @@ public class ModifyConversation extends AppCompatActivity {
         alert.show();
     }
 
+    /**
+     * Formatting the number with the international code (+XX)
+     * @param phoneNumber Phone Number to be formatted
+     * @return Formatted Phone Number
+     */
     private String formatNumber(String phoneNumber) {
         TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         String iso = tm.getSimCountryIso();
@@ -160,10 +167,13 @@ public class ModifyConversation extends AppCompatActivity {
         return PhoneNumberUtils.formatNumberToE164(phoneNumber, iso);
     }
 
-    private void wrongPassword() {
+    /**
+     * Method called when there is a wrong password or another error saving the keys
+     */
+    private void error() {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Wrong Password");
-        alert.setMessage("The given password doesn't match with the KeyStore password");
+        alert.setTitle("An error occured");
+        alert.setMessage("An error occured savng the keys. Please check the password");
         alert.setNegativeButton("Go Back", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

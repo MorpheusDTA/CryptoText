@@ -21,6 +21,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,6 +36,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     private ArrayList<String> conversationList = new ArrayList<>();
     private static Logger logger = Logger.getLogger(Encryption.class.getName());
 
+    /**
+     * Sets the list of the current conversations
+     * @param conversationList List of the conversations
+     */
     public void setConversationList(ArrayList<String> conversationList) {
         this.conversationList = conversationList;
         ListView conversationsListView = (ListView) findViewById( R.id.conversationsView );
@@ -60,10 +65,21 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (Encryption.exists()) {
+            //TODO + change visibilities
+        }
         update();
     }
 
-    public void newConversation(View view){
+    private void askForPassword () {
+
+    }
+
+    /**
+     * Create a new conversation
+     * @param view View of the button clicked to create a new conversation
+     */
+    private void newConversation(View view){
         Intent intent = new Intent(this, ModifyConversation.class);
         startActivity(intent);
     }
@@ -90,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     /**
      * Update the conversations list
      */
-    public void update() {
+    private void update() {
         seenList.clear();
         conversationList.clear();
         ArrayList<String> conversations = new ArrayList<>();// List of conversations
@@ -128,12 +144,12 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     }
 
     /**
-     * Get contact name from a phone number
+     * Get the contact name from a phone number
      *
      * @param phoneNumber Phone number
-     * @return Contact name
+     * @return Contact's name
      */
-    public String getContactName(String phoneNumber){
+    private String getContactName(String phoneNumber){
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
         Cursor cursor = getContentResolver().query(uri, new String[]{ContactsContract.Data.DISPLAY_NAME}, null, null, null);
         String contactName = "";

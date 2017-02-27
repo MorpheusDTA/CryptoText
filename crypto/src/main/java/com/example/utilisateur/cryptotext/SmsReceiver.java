@@ -30,8 +30,12 @@ public class SmsReceiver extends BroadcastReceiver {
     // Change the password here or give a user possibility to change it
     //public static final byte[] PASSWORD = new byte[]{ 0x20, 0x32, 0x34, 0x47, (byte) 0x84, 0x33, 0x58 };
 
+    /**
+     * Action to do on receiving a SMS
+     * @param context Context of the app
+     * @param intent Intent given to the Receiver
+     */
     public void onReceive( Context context, Intent intent ) {
-        String address = "";
         String text = "";
         // Get ContentResolver object for pushing SMS to the incoming folder
         ContentResolver contentResolver = context.getContentResolver();
@@ -39,7 +43,7 @@ public class SmsReceiver extends BroadcastReceiver {
         SmsMessage[] msgs = Intents.getMessagesFromIntent(intent);
         if (msgs.length == 1) {
             SmsMessage sms = msgs[0];
-            address = sms.getOriginatingAddress();
+            String address = sms.getOriginatingAddress();
 
             //Resolving the contact name from the contacts.
             Uri lookupUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(address));
@@ -62,6 +66,11 @@ public class SmsReceiver extends BroadcastReceiver {
         // this.abortBroadcast();
     }
 
+    /**
+     * Save SMS in the database
+     * @param contentResolver ContentResolver to save the SMS
+     * @param sms SMS to be saved
+     */
     private void putSmsToDatabase( ContentResolver contentResolver, SmsMessage sms ) {
         // Create SMS row
         ContentValues values = new ContentValues();

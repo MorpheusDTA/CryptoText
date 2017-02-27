@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:id="@+id/contact"
-            android:layout_weight="0.07"/>
+            android:layout_weight="0.05"/>
 
         <!--<ListView
             android:layout_width="wrap_content"
@@ -41,7 +41,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/checkEncryption"
-            android:layout_weight="0.04"
             android:checked="false" />
 
         <ListView
