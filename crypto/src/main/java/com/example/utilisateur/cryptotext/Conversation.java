@@ -133,20 +133,21 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
+        String keyStorePassword = "";
 
         TextView contact = (TextView) findViewById(R.id.contact);
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if(extras != null) {
                 phoneNumber = extras.getString(MainActivity.PHONE);
-                emissionSeed = extras.getString("keyOutSeed");
-                receptionSeed = extras.getString("keyInSeed");
+                keyStorePassword = extras.getString("keyStorePassword");
             }
         } else {
             phoneNumber = (String) savedInstanceState.getSerializable(MainActivity.PHONE);
-            receptionSeed = (String) savedInstanceState.getSerializable("keyInSeed");
-            emissionSeed = (String) savedInstanceState.getSerializable("keyOutSeed");
+            keyStorePassword = (String) savedInstanceState.getSerializable("keyStorePassword");
         }
+
+        //TODO check if there is an outgoing seed, to check/uncheck encryption
 
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
         Cursor cursor = getContentResolver().query(uri, new String[]{ContactsContract.Data.DISPLAY_NAME}, null, null, null);
@@ -180,6 +181,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
         try {
             SmsManager smsManager = SmsManager.getDefault();
+
             //message = Encryption.encrypt(emissionSeed, message);
             smsManager.sendTextMessage(phoneNumber, null, message, null, null);
             Toast.makeText(getApplicationContext(), "SMS sent to " + contactName, Toast.LENGTH_LONG).show();

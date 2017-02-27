@@ -6,7 +6,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -21,6 +24,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -32,6 +36,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 class Encryption {
     private static final Level level = Level.WARNING;
+    private static final String ENCRYPTION_IV = "4e5Wa71fYoT7MFEX";
     private static Logger logger = Logger.getLogger(Encryption.class.getName());
     private static final String keyStoreFile = "/storage/emulated/CryptoText/keys.keystore";
 
@@ -76,10 +81,16 @@ class Encryption {
 
     // Encrypts string and encodes in Base64
     public static String encrypt( String seed, String data ) throws Exception {
+        IvParameterSpec iv = null;
+        try {
+            iv = new IvParameterSpec(ENCRYPTION_IV.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            logger.log(level, "Impossible to generate IV: " + e.toString());
+        }
         byte[] clear = data.getBytes();
         SecretKeySpec secretKeySpec = new SecretKeySpec( seed.getBytes(), "AES" );
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init( Cipher.ENCRYPT_MODE, secretKeySpec );
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init( Cipher.ENCRYPT_MODE, secretKeySpec, iv);
 
         byte[] encrypted = cipher.doFinal(clear);
 
@@ -88,11 +99,13 @@ class Encryption {
 
     // Decrypts string encoded in Base64
     static String decrypt( String seed, String encryptedData ) {
+        IvParameterSpec iv;
         SecretKeySpec secretKeySpec = new SecretKeySpec( seed.getBytes(), "AES" );
         byte[] decrypted = new byte[]{};
         try {
-            Cipher cipher = Cipher.getInstance( "AES" );
-            cipher.init( Cipher.DECRYPT_MODE, secretKeySpec );
+            iv = new IvParameterSpec(ENCRYPTION_IV.getBytes("UTF-8"));
+            Cipher cipher = Cipher.getInstance( "AES/CBC/PKCS5Padding" );
+            cipher.init( Cipher.DECRYPT_MODE, secretKeySpec, iv);
 
             byte[] encrypted = Base64.decode(encryptedData, Base64.DEFAULT);
             decrypted = cipher.doFinal(encrypted);
@@ -106,8 +119,11 @@ class Encryption {
             logger.log(level, "Error on BlockSize, you may verify padding scheme" + e.toString());
         }catch(BadPaddingException e) {
             logger.log(level, "Decrypted data is not bounded by the appropriate padding bytes: " + e.toString());
+        }catch (UnsupportedEncodingException e) {
+            logger.log(level, "Impossible to generate IV: " + e.toString());
+        }catch (InvalidAlgorithmParameterException e){
+            logger.log(level, "Invalid Iv: " + e.toString());
         }
-
         return new String(decrypted);
     }
 

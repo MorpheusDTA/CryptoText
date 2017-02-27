@@ -60,18 +60,16 @@ public class ModifyConversation extends AppCompatActivity {
     }
 
     public void goToConversation(View view) {
-        /*EditText receptionKeySeed = (EditText) findViewById(R.id.RKeySeedField);
-        EditText emissionKeySeed = (EditText) findViewById(R.id.EKeySeedField);
-        EditText keyStoreField = (EditText) findViewById(R.id.passwordField);*/
-        /*String emissionSeed = emissionKeySeed.getText().toString();
-        String receptionSeed = receptionKeySeed.getText().toString();
-        String keyStorePassword = keyStoreField.getText().toString();*/
         EditText phone = (EditText) findViewById(R.id.phone);
+        EditText keyStoreField = (EditText) findViewById(R.id.passwordField);
+        String keyStorePassword = keyStoreField.getText().toString();
         phoneNumber = formatNumber(phone.getText().toString());
+
+        //TODO check the keyStorePassword
 
         Intent intent = new Intent(this, Conversation.class);
         intent.putExtra(MainActivity.PHONE, phoneNumber);
-        //intent.putExtra("keyStorePassword", keyStorePassword);
+        intent.putExtra("keyStorePassword", keyStorePassword);
         startActivity(intent);
 
         /*String errors = "";

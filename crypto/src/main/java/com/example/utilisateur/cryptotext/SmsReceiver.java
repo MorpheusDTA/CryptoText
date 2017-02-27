@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
-import android.provider.Telephony;
 import android.telephony.SmsMessage;
 import android.widget.Toast;
 import android.provider.Telephony.Sms.Intents;
@@ -20,8 +19,6 @@ import android.provider.Telephony.TextBasedSmsColumns;
  * @author DonatienTERTRAIS
  */
 public class SmsReceiver extends BroadcastReceiver {
-    public static String PHONE = "phoneNumber";
-    private Context context;
 
     public static final int MESSAGE_IS_NOT_READ = 0;
     public static final int MESSAGE_IS_READ = 1;

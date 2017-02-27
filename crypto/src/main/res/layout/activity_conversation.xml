@@ -36,6 +36,14 @@
             android:layout_weight="0.84"
             android:transcriptMode="alwaysScroll"/>-->
 
+        <CheckBox
+            android:text="@string/checkEncryption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/checkEncryption"
+            android:layout_weight="0.04"
+            android:checked="false" />
+
         <ListView
             android:id="@+id/smsList"
             android:layout_width="match_parent"
