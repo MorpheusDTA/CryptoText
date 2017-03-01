@@ -13,7 +13,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/go_to_conversation"
+        android:text="@string/goToConversation"
         android:id="@+id/createConversation"
         android:layout_marginBottom="34dp"
         android:layout_alignParentBottom="true"
@@ -27,7 +27,7 @@
         android:layout_centerVertical="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentStart="true"
-        android:hint="@string/emission_key_seed" />
+        android:hint="@string/emissionKeySeed" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -37,7 +37,7 @@
         android:layout_marginTop="37dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentStart="true"
-        android:hint="@string/reception_key_seed" />
+        android:hint="@string/receptionKeySeed" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -45,7 +45,7 @@
         android:inputType="textPassword"
         android:ems="10"
         android:id="@+id/passwordField"
-        android:hint="@string/key_store_file_password"
+        android:hint="@string/keyStoreFilePassword"
         android:layout_above="@+id/EKeySeedField"
         android:layout_alignParentStart="true"
         android:layout_marginBottom="39dp"
@@ -68,7 +68,7 @@
         android:inputType="phone"
         android:ems="10"
         android:id="@+id/phone"
-        android:hint="@string/phone_number"
+        android:hint="@string/phoneNumber"
         android:enabled="true"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />

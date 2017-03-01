@@ -23,10 +23,6 @@ public class SmsReceiver extends BroadcastReceiver {
     public static final int MESSAGE_IS_NOT_READ = 0;
     public static final int MESSAGE_IS_READ = 1;
 
-    public static final int MESSAGE_IS_NOT_SEEN = 0;
-    public static final int MESSAGE_IS_SEEN = 1;
-
-
     // Change the password here or give a user possibility to change it
     //public static final byte[] PASSWORD = new byte[]{ 0x20, 0x32, 0x34, 0x47, (byte) 0x84, 0x33, 0x58 };
 
@@ -41,25 +37,27 @@ public class SmsReceiver extends BroadcastReceiver {
         ContentResolver contentResolver = context.getContentResolver();
 
         SmsMessage[] msgs = Intents.getMessagesFromIntent(intent);
-        if (msgs.length == 1) {
+        if (msgs.length == 1) {// Only one new message
             SmsMessage sms = msgs[0];
             String address = sms.getOriginatingAddress();
 
             //Resolving the contact name from the contacts.
             Uri lookupUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(address));
             Cursor c = contentResolver.query(lookupUri, new String[]{ContactsContract.Data.DISPLAY_NAME}, null, null, null);
-            if (c != null && c.moveToFirst()) {
-                address = c.getString(c.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+            if (c != null) {
+                if (c.moveToFirst()) {
+                    address = c.getString(c.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+                }
+                c.close();
             }
-            c.close();
-            text = "SMS from " + address + " :\n";
+            text = R.string.smsFrom + " " + address + " :\n";
 
             putSmsToDatabase( contentResolver, sms );
-        } else if ( msgs.length > 1) {
+        } else if ( msgs.length > 1) {// Several new messages
             for (SmsMessage sms:msgs) {
                 putSmsToDatabase( contentResolver, sms );
             }
-            text = "" + msgs.length + "new messages";
+            text = "" + msgs.length + R.string.newMsgs;
         }
 
         Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
@@ -79,7 +77,7 @@ public class SmsReceiver extends BroadcastReceiver {
         values.put( "read", false);
         values.put( "status", sms.getStatus());
         values.put( "type", TextBasedSmsColumns.MESSAGE_TYPE_INBOX);
-        values.put( "seen", MESSAGE_IS_NOT_SEEN);
+        values.put( "seen", MESSAGE_IS_NOT_READ);
         values.put( "body", sms.getMessageBody());
         /*try {
             String encryptedPassword = Encryption.encrypt( new String(PASSWORD), sms.getMessageBody() );

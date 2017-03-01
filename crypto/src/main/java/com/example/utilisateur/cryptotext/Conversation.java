@@ -32,8 +32,8 @@ import java.util.logging.Logger;
  * @author DonatienTertrais
  */
 public class Conversation extends AppCompatActivity implements AdapterView.OnItemClickListener {
-    private String keyStorePassword = "";
     private String phoneNumber = "";
+    private String keyStorePassword = "";
     private String contactName = "Unknown";
     private static final Level level = Level.WARNING;
     private ArrayList<Integer> types = new ArrayList<>();
@@ -105,7 +105,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         ArrayList<String> mess = new ArrayList<>();
         final ArrayList<Integer> type = new ArrayList<>();
 
-        // Index de différentes infos sur le sms
+        // Indexes of the sms information
         int indexes[] = new int[]{cursor.getColumnIndex("date"), cursor.getColumnIndex("body"),
                 cursor.getColumnIndex("type"), cursor.getColumnIndex("seen"), cursor.getColumnIndex("_id")};
 
@@ -113,11 +113,11 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         if ( indexes[1] < 0 || !nextCursor ) return;
 
         String message;
-        while( nextCursor ){ // Lecture des sms du cursor, modification pour le cas de sms non vu
+        while( nextCursor ){ // Read the sms cursor, modify if there are unread sms
             message = getDate(cursor.getLong(indexes[0])) + "\n" + cursor.getString(indexes[1]);
-            if (cursor.getInt(indexes[3]) == 0) {
+            if (cursor.getInt(indexes[3]) == SmsReceiver.MESSAGE_IS_NOT_READ) {
                 ContentValues values = new ContentValues();
-                values.put("seen",1);
+                values.put("seen",SmsReceiver.MESSAGE_IS_READ);
                 getContentResolver().update(Uri.parse("content://sms/inbox"),values,
                         "_id="+cursor.getString(indexes[4]), null);
             }
@@ -131,11 +131,11 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
-        //CheckBox checkEncryption = (CheckBox) findViewById(R.id.checkEncryption);
-
+        CheckBox checkEncryption = (CheckBox) findViewById(R.id.checkEncryption);
+        // Get info in the intent
         TextView contact = (TextView) findViewById(R.id.contact);
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
@@ -147,31 +147,30 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             phoneNumber = (String) savedInstanceState.getSerializable(MainActivity.PHONE);
             keyStorePassword = (String) savedInstanceState.getSerializable("keyStorePassword");
         }
-
-        if (Encryption.isStocked(phoneNumber + "Out", keyStorePassword)) {
-            //checkEncryption.setChecked(true);
-        } else {
-            //checkEncryption.setChecked(false);
-            //checkEncryption.setEnabled(false);
+        // Manage the encryption checkbox
+        if (!Encryption.isStocked(phoneNumber + "Out", keyStorePassword)) {
+            checkEncryption.setChecked(false);
+            checkEncryption.setEnabled(false);
         }
-
+        // Get the contact name from the phone number
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
         Cursor cursor = getContentResolver().query(uri, new String[]{ContactsContract.Data.DISPLAY_NAME}, null, null, null);
-        if (cursor != null && cursor.moveToFirst()) {
-            contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+            }
+            cursor.close();
         }
-        cursor.close();
 
         String str = contactName + "/" + phoneNumber;
         contact.setText(str);
-
-        loadMessages();
+        loadMessages(); // Load the messages into the list
     }
 
     /**
      * Loads the messages from the database
      */
-    public void loadMessages () {
+    private void loadMessages () {
         ContentResolver contentResolver = getContentResolver();
         Cursor cursor = contentResolver.query(Uri.parse("content://sms/"), new String[]{"_id", "body", "date", "type", "seen"},
                 "address='" + phoneNumber + "'", null, null);
@@ -185,7 +184,6 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
     /**
      * Sending sms
-     *
      * @param view View of the floating action button
      */
     public void send (View view) {
@@ -195,6 +193,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
         try {
             SmsManager smsManager = SmsManager.getDefault();
+            // Encrypting if possible and wanted
             if (Encryption.isStocked(phoneNumber + "Out", keyStorePassword) && checkEncryption.isChecked()) {
                 // If a key isStocked and encryption asked, the message is encrypted
                 String key = Encryption.getKey(phoneNumber + "Out", keyStorePassword);
@@ -202,7 +201,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             }
             //Send SMS
             smsManager.sendTextMessage(phoneNumber, null, message, null, null);
-            Toast.makeText(getApplicationContext(), "SMS sent to " + contactName, Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.sentTo + contactName, Toast.LENGTH_LONG).show();
             // Update the view
             getTypes().add(0);
             getMessages().add(getDate((long) 0) + "\n" + message);
@@ -211,24 +210,24 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
             messageField.getText().clear();
         } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), "SMS failed, please try again.", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.sendFail, Toast.LENGTH_LONG).show();
             logger.log(level, "Failed sending SMS: " + e.toString());
         }
     }
 
     @Override
+    // On click of a text message : decrypt it
     public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Decryption");
-        alert.setMessage("Please, confirm decryption.");
-        alert.setPositiveButton("Decrypt", new DialogInterface.OnClickListener() {
+        alert.setTitle(R.string.decryption);
+        alert.setPositiveButton(R.string.decrypt, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
                 decrypt( position );
             }
         });
-        alert.setNegativeButton("Go Back", new DialogInterface.OnClickListener() {
+        alert.setNegativeButton(R.string.goBack, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -248,15 +247,16 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         String message = txt.substring(idx + 1);
 
         String key = "";
+        // Get key
         if (types.get(position) == 1 && Encryption.isStocked(phoneNumber + "In", keyStorePassword)) {
             key = Encryption.getKey(phoneNumber + "In", keyStorePassword);
         } else if (types.get(position) == 2 && Encryption.isStocked(phoneNumber + "Out", keyStorePassword)) {
             key = Encryption.getKey(phoneNumber + "Out", keyStorePassword);
-        };
+        }
         message = Encryption.decrypt(key, message);
 
         messages.set(position, date + "\n" + message);
-        setMessages(messages);
+        setMessages(messages);// TODO slight mistake : impossible to have several sms decrypted in the view
     }
 
     /*private void saveSMS(String encryptedBody, String body, String date) {
@@ -280,6 +280,11 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         }
     }*/
 
+    /**
+     * Get the milliseconds equivalent for the date
+     * @param date Date
+     * @return Number of milliseconds for the referred date
+     */
     private Long millisFromDate(String date) {
         String[] infos = date.split(" ");
         int ind = infos[4].indexOf(":");
@@ -289,6 +294,11 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         return cal.getTimeInMillis();
     }
 
+    /**
+     * Get the date from the the date
+     * @param millis Number of milliseconds
+     * @return Date linked to the number of milliseconds
+     */
     private String getDate(Long millis){
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(millis);

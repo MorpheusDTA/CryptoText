@@ -28,12 +28,9 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
+ * The keys are stocked in a file protected with a password which is to be given before opening and creating a conversation
  * @author DonatienTERTRAIS
  */
-
-//The keys are stocked in a file, this file is protected with a password which is to be given every time a key is used
-//(before openning and creating a conversation
-
 class Encryption {
     private static final int WRONG_PASSWORD = 2;
     private static final int EXIT_SUCCESS = 1;
@@ -48,7 +45,7 @@ class Encryption {
      * @param filePassword Password of the KeyStore file
      * @return The KeyStore file
      */
-    private static KeyStore createKeyStore(String filePassword) {
+    public static KeyStore createKeyStore(String filePassword) {
         File file = new File(KEY_STORE_PATH);
 
         KeyStore keyStore = null;
@@ -88,8 +85,8 @@ class Encryption {
     }
 
     /**
-     * Checks if the KeyStore file exists
-     * @return Whether the file already exists or not
+     *Checks if the keystore file exists
+     * @return True if the file exists, false otherwise
      */
     static boolean exists() {
         return (new File(KEY_STORE_PATH).exists());
@@ -194,7 +191,6 @@ class Encryption {
         if (keyStore == null) {
             return null;
         }
-        KeyStore.PasswordProtection passwordProtection = new KeyStore.PasswordProtection(filePassword.toCharArray());
         try {
             key = keyStore.getKey(alias, filePassword.toCharArray()).toString();
         } catch (KeyStoreException e) {

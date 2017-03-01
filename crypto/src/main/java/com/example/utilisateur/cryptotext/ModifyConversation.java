@@ -30,7 +30,7 @@ public class ModifyConversation extends AppCompatActivity {
     private static Logger logger = Logger.getLogger(Encryption.class.getName());
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_modify_conversation);
 
@@ -57,8 +57,10 @@ public class ModifyConversation extends AppCompatActivity {
 
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
         Cursor cursor = getContentResolver().query(uri, new String[]{ContactsContract.Data.DISPLAY_NAME}, null, null, null);
-        if (cursor != null && cursor.moveToFirst()) {
-            contact.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME)));
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                contact.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME)));
+            }
             cursor.close();
         }
     }
@@ -67,7 +69,7 @@ public class ModifyConversation extends AppCompatActivity {
      * Go to the chosen conversation
      * @param view View of the button clicked
      */
-    private void goToConversation(View view) {
+    public void goToConversation(View view) {
         EditText phone = (EditText) findViewById(R.id.phone);
         EditText keyStoreField = (EditText) findViewById(R.id.passwordField);
         String keyStorePassword = keyStoreField.getText().toString();
@@ -80,7 +82,7 @@ public class ModifyConversation extends AppCompatActivity {
         intent.putExtra("keyStorePassword", keyStorePassword);
         startActivity(intent);
 
-        //TODO check if ther are errors
+        //TODO check if there are errors
         /*String errors = "";
         if (phoneNumber.isEmpty()) {
             errors = errors + "The phone number isn't correct\n";
@@ -135,16 +137,16 @@ public class ModifyConversation extends AppCompatActivity {
      */
     private void createAlertDialog(String errors) {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Warnings");
-        alert.setMessage("Warnings :\n" + errors);
-        alert.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+        alert.setTitle(R.string.warnings);
+        alert.setMessage(R.string.warnings + " :\n" + errors);
+        alert.setPositiveButton(R.string.continueStr, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
                 saveKeys();
             }
         });
-        alert.setNegativeButton("Go Back", new DialogInterface.OnClickListener() {
+        alert.setNegativeButton(R.string.goBack, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -172,9 +174,9 @@ public class ModifyConversation extends AppCompatActivity {
      */
     private void error() {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("An error occured");
-        alert.setMessage("An error occured savng the keys. Please check the password");
-        alert.setNegativeButton("Go Back", new DialogInterface.OnClickListener() {
+        alert.setTitle(R.string.errorOccured);
+        alert.setMessage(R.string.errorOccuredMsg);
+        alert.setNegativeButton(R.string.goBack, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();

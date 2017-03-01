@@ -2,6 +2,7 @@ package com.example.utilisateur.cryptotext;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -9,19 +10,23 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
+import android.text.InputType;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.TextView;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
      * Sets the list of the current conversations
      * @param conversationList List of the conversations
      */
-    public void setConversationList(ArrayList<String> conversationList) {
+    private void setConversationList(ArrayList<String> conversationList) {
         this.conversationList = conversationList;
         ListView conversationsListView = (ListView) findViewById( R.id.conversationsView );
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, this.conversationList) {
@@ -62,24 +67,21 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
+        if (!Encryption.exists()){// If the keystore file does not exist, it is to be created
+            Intent intent = new Intent(this, EnterPassword.class);
+            startActivity(intent);
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (Encryption.exists()) {
-            //TODO + change visibilities
-        }
         update();
-    }
-
-    private void askForPassword () {
-
     }
 
     /**
      * Create a new conversation
      * @param view View of the button clicked to create a new conversation
      */
-    private void newConversation(View view){
+    public void newConversation(View view){
         Intent intent = new Intent(this, ModifyConversation.class);
         startActivity(intent);
     }
@@ -133,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
             if (!cursor.isNull(indexAddress) && !numbers.contains(number = formatNumber(cursor.getString(indexAddress)))){// Not a draft and the phone number not already listed => new conversation
                 seen.add(cursor.getInt(indexSeen));
                 numbers.add(number);
-                conversations.add( "Conversation: " + getContactName(number) + "\n" + number );
+                conversations.add( R.string.titleActivityConversation + ": " + getContactName(number) + "\n" + number );
             }
             nextCursor = cursor.moveToNext();
         }
@@ -159,7 +161,6 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         }
         return contactName;
     }
-    //The SMS text is obtained from the list, decrypted and then shown. SmsReceiver.PASSWORD can be changed in any way. The list item listener is as follows:
 
     /**
      * When a coversation is clicked, go to the ModifyConversation Activity
