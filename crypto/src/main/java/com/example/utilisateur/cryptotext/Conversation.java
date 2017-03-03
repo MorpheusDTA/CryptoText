@@ -3,6 +3,7 @@ package com.example.utilisateur.cryptotext;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -29,6 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * Activity for a conversation, the user can send messages, see the messages he received
  * @author DonatienTertrais
  */
 public class Conversation extends AppCompatActivity implements AdapterView.OnItemClickListener {
@@ -148,7 +150,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             keyStorePassword = (String) savedInstanceState.getSerializable("keyStorePassword");
         }
         // Manage the encryption checkbox
-        if (!Encryption.isStocked(phoneNumber + "Out", keyStorePassword)) {
+        if (!Encryption.isStocked(getApplicationContext(), phoneNumber + "Out", keyStorePassword)) {
             checkEncryption.setChecked(false);
             checkEncryption.setEnabled(false);
         }
@@ -193,10 +195,11 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
         try {
             SmsManager smsManager = SmsManager.getDefault();
+            Context context = getApplicationContext();
             // Encrypting if possible and wanted
-            if (Encryption.isStocked(phoneNumber + "Out", keyStorePassword) && checkEncryption.isChecked()) {
+            if (Encryption.isStocked(context, phoneNumber + "Out", keyStorePassword) && checkEncryption.isChecked()) {
                 // If a key isStocked and encryption asked, the message is encrypted
-                String key = Encryption.getKey(phoneNumber + "Out", keyStorePassword);
+                String key = Encryption.getKey(context, phoneNumber + "Out", keyStorePassword);
                 message = Encryption.encrypt(key, message);
             }
             //Send SMS
@@ -247,11 +250,12 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         String message = txt.substring(idx + 1);
 
         String key = "";
+        Context context = getApplicationContext();
         // Get key
-        if (types.get(position) == 1 && Encryption.isStocked(phoneNumber + "In", keyStorePassword)) {
-            key = Encryption.getKey(phoneNumber + "In", keyStorePassword);
-        } else if (types.get(position) == 2 && Encryption.isStocked(phoneNumber + "Out", keyStorePassword)) {
-            key = Encryption.getKey(phoneNumber + "Out", keyStorePassword);
+        if (types.get(position) == 1 && Encryption.isStocked(context, phoneNumber + "In", keyStorePassword)) {
+            key = Encryption.getKey(context, phoneNumber + "In", keyStorePassword);
+        } else if (types.get(position) == 2 && Encryption.isStocked(context, phoneNumber + "Out", keyStorePassword)) {
+            key = Encryption.getKey(context, phoneNumber + "Out", keyStorePassword);
         }
         message = Encryption.decrypt(key, message);
 

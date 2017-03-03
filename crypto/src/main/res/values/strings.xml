@@ -27,6 +27,12 @@
     <string name="confirmDecryption">Please, confirm decryption</string>
     <string name="sendFail">Sending SMS failed, please try again</string>
     <string name="sentTo">SMS sent to </string>
-    <string name="noMatchPassword">Passwords do not match. Please Confirm again.</string>
-    <string name="saveChanges">SaveChanegs</string>
+    <string name="noMatchPassword">Passwords do not match or are too short. Please Confirm again.</string>
+    <string name="saveChanges">Save Changes</string>
+    <string name="phoneIncorrect">The phone number is not correct</string>
+    <string name="eOverW">The current emission key will be overwritten</string>
+    <string name="rOverW">The current reception key will be overwritten</string>
+    <string name="invalidData">The given data are invalid. Please try again.</string>
+    <string name="conversation">Converation</string>
+    <string name="nullPwd">Password Fields can not be empty</string>
 </resources>

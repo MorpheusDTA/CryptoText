@@ -1,5 +1,6 @@
 package com.example.utilisateur.cryptotext;
 
+import android.content.Context;
 import android.util.Base64;
 
 import java.io.File;
@@ -32,25 +33,22 @@ import javax.crypto.spec.SecretKeySpec;
  * @author DonatienTERTRAIS
  */
 class Encryption {
-    private static final int WRONG_PASSWORD = 2;
-    private static final int EXIT_SUCCESS = 1;
-    private static final int ERROR_ON_ACTION = 0;
     private static final Level level = Level.WARNING;
     private static final String ENCRYPTION_IV = "4e5Wa71fYoT7MFEX";
     private static Logger logger = Logger.getLogger(Encryption.class.getName());
-    private static final String KEY_STORE_PATH = "/storage/emulated/CryptoText/CryptoKeys.keystore";
+    private static final String KEY_FILE_NAME = "CryptoKeys.keystore";
 
     /**
      * Creates a KeyStore file or loads it if was already created
      * @param filePassword Password of the KeyStore file
      * @return The KeyStore file
      */
-    public static KeyStore createKeyStore(String filePassword) {
-        File file = new File(KEY_STORE_PATH);
+    static KeyStore createKeyStore(Context context, String filePassword) {
+        File file = new File(context.getFilesDir(), KEY_FILE_NAME);
 
         KeyStore keyStore = null;
         try {
-            keyStore = KeyStore.getInstance("JCEKS");
+            keyStore = KeyStore.getInstance("AndroidKeyStore");
         } catch (KeyStoreException e) {
             logger.log(level, "No provider supports the specified type: " + e.toString());
         }
@@ -58,6 +56,7 @@ class Encryption {
             // .keystore file already exists => load it
             try {
                 keyStore.load(new FileInputStream(file), filePassword.toCharArray());
+
             } catch ( NoSuchAlgorithmException e) {
                 logger.log(level, "No algorithm to check the keystore integrity:" + e.toString());
             } catch ( CertificateException e) {
@@ -70,7 +69,7 @@ class Encryption {
             // .keystore file not created yet => create it
             try {
                 keyStore.load(null, null);
-                keyStore.store(new FileOutputStream(KEY_STORE_PATH), filePassword.toCharArray());
+                keyStore.store(new FileOutputStream(KEY_FILE_NAME), filePassword.toCharArray());
             } catch ( NoSuchAlgorithmException e) {
                 logger.log(level, "The algorithm to check the integrity cannot be found: " + e.toString());
             } catch ( CertificateException e) {
@@ -85,11 +84,38 @@ class Encryption {
     }
 
     /**
+     * This function test a password on a keystore
+     * @param password Password that is to be tried
+     * @return True if the password is correct, false otherwise
+     */
+    static boolean testPassword(Context context, String password) {
+        File file = new File(context.getFilesDir(), KEY_FILE_NAME);
+        KeyStore keyStore = null;
+        try {
+            keyStore = KeyStore.getInstance("JCEKS");
+        } catch (KeyStoreException e) {
+            logger.log(level, "No provider supports the specified type: " + e.toString());
+        }
+        if (file.exists()) {
+            // .keystore file already exists => load it
+            try {
+                keyStore.load(new FileInputStream(file), password.toCharArray());
+
+            } catch ( Exception e) {
+                logger.log(level, "Exception on testing password:" + e.toString());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      *Checks if the keystore file exists
      * @return True if the file exists, false otherwise
      */
-    static boolean exists() {
-        return (new File(KEY_STORE_PATH).exists());
+    static boolean exists(Context context) {
+        File file = new File(context.getFilesDir(), KEY_FILE_NAME);
+        return (file.exists());
     }
 
     /**
@@ -168,8 +194,8 @@ class Encryption {
      * @param filePassword Password of the KeyStore file
      * @return Whether the entry is stocked or not
      */
-    static boolean isStocked(String entry, String filePassword) {
-        KeyStore keyStore = createKeyStore(filePassword);
+    static boolean isStocked(Context context, String entry, String filePassword) {
+        KeyStore keyStore = createKeyStore(context, filePassword);
         boolean cond = false;
         try {
             cond = keyStore.containsAlias(entry);
@@ -185,9 +211,9 @@ class Encryption {
      * @param filePassword Password of the KeyStore file
      * @return The searched key
      */
-    static String getKey(String alias, String filePassword) {
+    static String getKey(Context context, String alias, String filePassword) {
         String key = "";
-        KeyStore keyStore = createKeyStore(filePassword);
+        KeyStore keyStore = createKeyStore(context, filePassword);
         if (keyStore == null) {
             return null;
         }
@@ -208,12 +234,11 @@ class Encryption {
      * @param seed Seed to be used
      * @param filePassword Password of the Keystore file
      * @param alias Alias to be given to the Key
-     * @return A return code
      */
-    static int saveKey(String seed, String filePassword, String alias) {
-        KeyStore keyStore = createKeyStore(filePassword);
+    static void saveKey(Context context, String seed, String filePassword, String alias) {
+        KeyStore keyStore = createKeyStore(context, filePassword);
         if (keyStore == null) {
-            return WRONG_PASSWORD;
+            return;
         }
         KeyStore.PasswordProtection passwordProtection = new KeyStore.PasswordProtection(filePassword.toCharArray());
         try {
@@ -223,9 +248,7 @@ class Encryption {
             }
         } catch (KeyStoreException e) {
             logger.log(level, "KeyStore is not loaded/initialized: " + e.toString());
-            return ERROR_ON_ACTION;
         }
-        return EXIT_SUCCESS;
     }
 
     /**

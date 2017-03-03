@@ -11,23 +11,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
+import android.text.Editable;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
+ * In this activity, the user can save some encryption/decryption key
  * @author DonatienTertrais
  */
 public class ModifyConversation extends AppCompatActivity {
-    private static final int WRONG_PASSWORD = 2;
-    private static final int EXIT_SUCCESS = 1;
-    private static final int ERROR_ON_ACTION = 0;
     private String phoneNumber;
-    private static final Level level = Level.WARNING;
-    private static Logger logger = Logger.getLogger(Encryption.class.getName());
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,80 +64,97 @@ public class ModifyConversation extends AppCompatActivity {
      * @param view View of the button clicked
      */
     public void goToConversation(View view) {
-        EditText phone = (EditText) findViewById(R.id.phone);
-        EditText keyStoreField = (EditText) findViewById(R.id.passwordField);
-        String keyStorePassword = keyStoreField.getText().toString();
-        phoneNumber = formatNumber(phone.getText().toString());
+        Editable pwdField = ((EditText) findViewById(R.id.passwordField)).getText();
+        Editable phone = ((EditText) findViewById(R.id.phone)).getText();
+        Editable emission = ((EditText) findViewById(R.id.EKeySeedField)).getText();
+        Editable reception = ((EditText) findViewById(R.id.RKeySeedField)).getText();
 
-        //TODO check the keyStorePassword
+        if (pwdField == null || phone == null) {
+            invalidData();
+            return;
+        }
+        Context context = getApplicationContext();
+        String pwd = pwdField.toString();
+        ((EditText) findViewById(R.id.passwordField)).setText("");
+        phoneNumber = formatNumber(phone.toString());
+        if (!Encryption.testPassword(context, pwd)) {
+            invalidData();
+            return;
+        }
+
+        String eSeed = emission.toString(), rSeed = reception.toString();
+        //If the given password is correct, look for errors in the given info
+        boolean emissionCode = false, receptionCode = false;
+        if (eSeed.length() != 0) {
+            if (Encryption.isStocked(context, phoneNumber + "Out", pwd)) {//emission key will be overwritten
+                emissionCode = true;
+            } else {
+                Encryption.saveKey(context, eSeed, pwd, phoneNumber + "Out");//Save emission Key
+            }
+        } else if (rSeed.length() != 0) {
+            if (Encryption.isStocked(context, phoneNumber + "In", pwd)) {//reception key will be overwritten
+                receptionCode = true;
+            } else {
+                Encryption.saveKey(context, rSeed, pwd, phoneNumber + "In");//Save reception key
+            }
+        }
+        if ( emissionCode || receptionCode) {
+            createAlertDialog(emissionCode, receptionCode);
+            return;
+        }
 
         Intent intent = new Intent(this, Conversation.class);
         intent.putExtra(MainActivity.PHONE, phoneNumber);
-        intent.putExtra("keyStorePassword", keyStorePassword);
+        intent.putExtra("keyStorePassword", pwd);
         startActivity(intent);
+    }
 
-        //TODO check if there are errors
-        /*String errors = "";
-        if (phoneNumber.isEmpty()) {
-            errors = errors + "The phone number isn't correct\n";
-        } else {
-            if ((!emissionSeed.isEmpty()) ^ Encryption.isStocked(phoneNumber + "Out", keyStorePassword)) {
-                if (emissionSeed.length() != 0) {
-                    errors = errors + "The current emission seed will be overwritten\n";
-                } else {
-                    errors = errors + "There will be no emission seed\n";
-                }
+    private void invalidData () {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle(R.string.warnings);
+        alert.setMessage(R.string.warnings + " :\n" + R.string.invalidData);
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
             }
-            if ((!receptionSeed.isEmpty()) ^ Encryption.isStocked(phoneNumber + "In", keyStorePassword)) {
-                if (receptionSeed.length() != 0) {
-                    errors = errors + "The current reception seed will be overwritten\n";
-                } else {
-                    errors = errors + "There will be no reception seed\n";
-                }
-            }
-        }
-        if (errors.length() == 0) {
-            saveSeeds();
-        } else {
-            createAlertDialog(errors);
-        }*/
+        });
+        alert.show();
     }
 
     /**
-     * Save the Keys
+     * Save the keys
+     * @param emissionCode if the emission key is to be overwritten
+     * @param receptionCode if the reception key is to be overwritten
      */
-    private void saveKeys() {
+    private void saveKeys(boolean emissionCode, boolean receptionCode) {
+        Context context = getApplicationContext();
         EditText fields[] = new EditText[] {(EditText) findViewById(R.id.RKeySeedField), (EditText) findViewById(R.id.EKeySeedField),
                 (EditText) findViewById(R.id.passwordField)};
         String password = fields[2].getText().toString();
         String emissionSeed = fields[1].getText().toString();
         String receptionSeed = fields[0].getText().toString();
-        int a = Encryption.saveKey(emissionSeed, password, phoneNumber + "Out");
-        if (a == WRONG_PASSWORD || a == ERROR_ON_ACTION) {
-            error();
-        } else {
-            Encryption.saveKey(receptionSeed, password, phoneNumber + "In");
-        }
-
-        Intent intent = new Intent(this, Conversation.class);
-        intent.putExtra(MainActivity.PHONE, phoneNumber);
-        intent.putExtra("keyStorePassword", password);
-        startActivity(intent);
+        if (emissionCode) Encryption.saveKey(context, emissionSeed, password, phoneNumber + "Out");
+        if (receptionCode) Encryption.saveKey(context, receptionSeed, password, phoneNumber + "In");
     }
 
     /**
      * Create alert window when there are some errors
-     * @param errors Detected errors
+     * @param emissionCode if the emission key is to be overwritten
+     * @param receptionCode if the reception key is to be overwritten
      */
-    private void createAlertDialog(String errors) {
+    private void createAlertDialog(final boolean emissionCode, final boolean receptionCode) {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle(R.string.warnings);
-        alert.setMessage(R.string.warnings + " :\n" + errors);
+        String msg = "";
+        if (emissionCode) msg = R.string.warnings + " :\n" + R.string.eOverW + "\n";
+        if (receptionCode) msg += R.string.rOverW;
+        alert.setMessage(msg);
         alert.setPositiveButton(R.string.continueStr, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                saveKeys();
+                saveKeys(emissionCode, receptionCode);
             }
         });
         alert.setNegativeButton(R.string.goBack, new DialogInterface.OnClickListener() {
@@ -167,21 +178,5 @@ public class ModifyConversation extends AppCompatActivity {
             phoneNumber = "+" + CountryToPhonePrefix.prefixFor(iso.toUpperCase()) + phoneNumber;
         }
         return PhoneNumberUtils.formatNumberToE164(phoneNumber, iso);
-    }
-
-    /**
-     * Method called when there is a wrong password or another error saving the keys
-     */
-    private void error() {
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle(R.string.errorOccured);
-        alert.setMessage(R.string.errorOccuredMsg);
-        alert.setNegativeButton(R.string.goBack, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        alert.show();
     }
 }

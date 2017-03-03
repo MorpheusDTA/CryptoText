@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".EnterPassword"
             android:label="@string/appName"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -38,7 +38,7 @@
             android:label="@string/titleActivityConversation"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ModifyConversation" />
-        <activity android:name=".EnterPassword"></activity>
+        <activity android:name=".MainActivity"></activity>
     </application>
 
 </manifest>

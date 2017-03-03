@@ -36,9 +36,9 @@ public class SmsReceiver extends BroadcastReceiver {
         // Get ContentResolver object for pushing SMS to the incoming folder
         ContentResolver contentResolver = context.getContentResolver();
 
-        SmsMessage[] msgs = Intents.getMessagesFromIntent(intent);
-        if (msgs.length == 1) {// Only one new message
-            SmsMessage sms = msgs[0];
+        SmsMessage[] messages = Intents.getMessagesFromIntent(intent);
+        if (messages.length == 1) {// Only one new message
+            SmsMessage sms = messages[0];
             String address = sms.getOriginatingAddress();
 
             //Resolving the contact name from the contacts.
@@ -53,11 +53,11 @@ public class SmsReceiver extends BroadcastReceiver {
             text = R.string.smsFrom + " " + address + " :\n";
 
             putSmsToDatabase( contentResolver, sms );
-        } else if ( msgs.length > 1) {// Several new messages
-            for (SmsMessage sms:msgs) {
+        } else if ( messages.length > 1) {// Several new messages
+            for (SmsMessage sms:messages) {
                 putSmsToDatabase( contentResolver, sms );
             }
-            text = "" + msgs.length + R.string.newMsgs;
+            text = "" + messages.length + R.string.newMsgs;
         }
 
         Toast.makeText(context, text, Toast.LENGTH_SHORT).show();

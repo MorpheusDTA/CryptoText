@@ -2,39 +2,33 @@ package com.example.utilisateur.cryptotext;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
-import android.text.InputType;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * Asks for the password of the keystore file and creates it
  * @author DonatienTERTRAIS
  */
-public class MainActivity extends AppCompatActivity implements OnItemClickListener {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
     public static String PHONE = "phoneNumber";
     private static final Level level = Level.WARNING;
     private ArrayList<Integer> seenList = new ArrayList<>();
@@ -68,12 +62,8 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        if (!Encryption.exists()){// If the keystore file does not exist, it is to be created
-            Intent intent = new Intent(this, EnterPassword.class);
-            startActivity(intent);
-        }
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_enter_password);
         update();
     }
 
@@ -135,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
             if (!cursor.isNull(indexAddress) && !numbers.contains(number = formatNumber(cursor.getString(indexAddress)))){// Not a draft and the phone number not already listed => new conversation
                 seen.add(cursor.getInt(indexSeen));
                 numbers.add(number);
-                conversations.add( R.string.titleActivityConversation + ": " + getContactName(number) + "\n" + number );
+                conversations.add( /*R.string.conversation*/"Conversation" + ": " + getContactName(number) + "\n" + number );
             }
             nextCursor = cursor.moveToNext();
         }
@@ -170,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
      * @param pos The position of the view in the adapter.
      * @param id The row id of the item that was clicked.
      */
-    public void onItemClick( AdapterView<?> parent, View view, int pos, long id ) {
+    public void onItemClick(AdapterView<?> parent, View view, int pos, long id ) {
         String phoneNumber = conversationList.get(pos).split("\n")[1];
         Intent intent = new Intent(this, ModifyConversation.class);
         intent.putExtra(PHONE, phoneNumber);
