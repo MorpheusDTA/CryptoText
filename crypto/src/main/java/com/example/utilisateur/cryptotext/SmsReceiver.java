@@ -1,6 +1,5 @@
 package com.example.utilisateur.cryptotext;
 
-
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -13,7 +12,6 @@ import android.telephony.SmsMessage;
 import android.widget.Toast;
 import android.provider.Telephony.Sms.Intents;
 import android.provider.Telephony.TextBasedSmsColumns;
-
 
 /**
  * @author DonatienTERTRAIS
@@ -50,7 +48,7 @@ public class SmsReceiver extends BroadcastReceiver {
                 }
                 c.close();
             }
-            text = R.string.smsFrom + " " + address + " :\n";
+            text = "SMS from " + address;
 
             putSmsToDatabase( contentResolver, sms );
         } else if ( messages.length > 1) {// Several new messages

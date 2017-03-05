@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,8 +22,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Asks for the password of the keystore file and creates it
@@ -30,10 +29,8 @@ import java.util.logging.Logger;
  */
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
     public static String PHONE = "phoneNumber";
-    private static final Level level = Level.WARNING;
     private ArrayList<Integer> seenList = new ArrayList<>();
     private ArrayList<String> conversationList = new ArrayList<>();
-    private static Logger logger = Logger.getLogger(Encryption.class.getName());
 
     /**
      * Sets the list of the current conversations
@@ -63,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_enter_password);
+        setContentView(R.layout.activity_main);
         update();
     }
 
@@ -109,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         ContentResolver contentResolver = getContentResolver();
         Cursor cursor = contentResolver.query(Uri.parse("content://sms/"), new String[]{"address", "seen", "body"}, null, null, null);
         if (cursor == null) {
-            logger.log(level, "Null Cursor on getting the text messages.");
+            Log.d("CT: null cursor get SMS", "");
             return;
         }
         // Indexes of the fields
@@ -125,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             if (!cursor.isNull(indexAddress) && !numbers.contains(number = formatNumber(cursor.getString(indexAddress)))){// Not a draft and the phone number not already listed => new conversation
                 seen.add(cursor.getInt(indexSeen));
                 numbers.add(number);
-                conversations.add( /*R.string.conversation*/"Conversation" + ": " + getContactName(number) + "\n" + number );
+                conversations.add( getString(R.string.conversation)+ ": " + getContactName(number) + "\n" + number );
             }
             nextCursor = cursor.moveToNext();
         }

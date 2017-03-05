@@ -73,11 +73,10 @@ public class ModifyConversation extends AppCompatActivity {
             invalidData();
             return;
         }
-        Context context = getApplicationContext();
         String pwd = pwdField.toString();
         ((EditText) findViewById(R.id.passwordField)).setText("");
         phoneNumber = formatNumber(phone.toString());
-        if (!Encryption.testPassword(context, pwd)) {
+        if (!Encryption.testPassword(getApplication(), pwd)) {
             invalidData();
             return;
         }
@@ -85,13 +84,15 @@ public class ModifyConversation extends AppCompatActivity {
         String eSeed = emission.toString(), rSeed = reception.toString();
         //If the given password is correct, look for errors in the given info
         boolean emissionCode = false, receptionCode = false;
+        Context context = getApplication();
         if (eSeed.length() != 0) {
             if (Encryption.isStocked(context, phoneNumber + "Out", pwd)) {//emission key will be overwritten
                 emissionCode = true;
             } else {
                 Encryption.saveKey(context, eSeed, pwd, phoneNumber + "Out");//Save emission Key
             }
-        } else if (rSeed.length() != 0) {
+        }
+        if (rSeed.length() != 0) {
             if (Encryption.isStocked(context, phoneNumber + "In", pwd)) {//reception key will be overwritten
                 receptionCode = true;
             } else {
@@ -112,7 +113,7 @@ public class ModifyConversation extends AppCompatActivity {
     private void invalidData () {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle(R.string.warnings);
-        alert.setMessage(R.string.warnings + " :\n" + R.string.invalidData);
+        alert.setMessage(getString(R.string.warnings) + " :\n" + getString(R.string.invalidData));
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -128,14 +129,19 @@ public class ModifyConversation extends AppCompatActivity {
      * @param receptionCode if the reception key is to be overwritten
      */
     private void saveKeys(boolean emissionCode, boolean receptionCode) {
-        Context context = getApplicationContext();
-        EditText fields[] = new EditText[] {(EditText) findViewById(R.id.RKeySeedField), (EditText) findViewById(R.id.EKeySeedField),
-                (EditText) findViewById(R.id.passwordField)};
-        String password = fields[2].getText().toString();
-        String emissionSeed = fields[1].getText().toString();
-        String receptionSeed = fields[0].getText().toString();
-        if (emissionCode) Encryption.saveKey(context, emissionSeed, password, phoneNumber + "Out");
-        if (receptionCode) Encryption.saveKey(context, receptionSeed, password, phoneNumber + "In");
+        Editable fields[] = new Editable[] {((EditText) findViewById(R.id.RKeySeedField)).getText(),
+                ((EditText) findViewById(R.id.EKeySeedField)).getText(),
+                ((EditText) findViewById(R.id.passwordField)).getText()};
+        String pwd = fields[2].toString();
+        String eSeed = fields[1].toString();
+        String rSeed = fields[0].toString();
+        if (emissionCode) Encryption.saveKey(getApplication(), eSeed, pwd, phoneNumber + "Out");
+        if (receptionCode) Encryption.saveKey(getApplication(), rSeed, pwd, phoneNumber + "In");
+
+        Intent intent = new Intent(this, Conversation.class);
+        intent.putExtra(MainActivity.PHONE, phoneNumber);
+        intent.putExtra("keyStorePassword", pwd);
+        startActivity(intent);
     }
 
     /**
@@ -146,9 +152,9 @@ public class ModifyConversation extends AppCompatActivity {
     private void createAlertDialog(final boolean emissionCode, final boolean receptionCode) {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle(R.string.warnings);
-        String msg = "";
-        if (emissionCode) msg = R.string.warnings + " :\n" + R.string.eOverW + "\n";
-        if (receptionCode) msg += R.string.rOverW;
+        String msg = getString(R.string.warnings) + " :\n";
+        if (emissionCode) msg += getString(R.string.eOverW) + "\n";
+        if (receptionCode) msg += getString(R.string.rOverW);
         alert.setMessage(msg);
         alert.setPositiveButton(R.string.continueStr, new DialogInterface.OnClickListener() {
             @Override

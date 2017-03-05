@@ -2,9 +2,11 @@ package com.example.utilisateur.cryptotext;
 
 import android.content.Context;
 import android.util.Base64;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -16,8 +18,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -33,89 +33,100 @@ import javax.crypto.spec.SecretKeySpec;
  * @author DonatienTERTRAIS
  */
 class Encryption {
-    private static final Level level = Level.WARNING;
     private static final String ENCRYPTION_IV = "4e5Wa71fYoT7MFEX";
-    private static Logger logger = Logger.getLogger(Encryption.class.getName());
     private static final String KEY_FILE_NAME = "CryptoKeys.keystore";
 
     /**
      * Creates a KeyStore file or loads it if was already created
-     * @param filePassword Password of the KeyStore file
-     * @return The KeyStore file
+     * @param context The context of the application
+     * @param pwd Password of the KeyStore file
      */
-    static KeyStore createKeyStore(Context context, String filePassword) {
-        File file = new File(context.getFilesDir(), KEY_FILE_NAME);
+    static void createKeyStore(Context context, String pwd) {
+        try {
+            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keyStore.load(null, pwd.toCharArray());
+            saveKeyStore(context, keyStore, pwd);
+        } catch (Exception e) {
+            checkExceptions2(e);
+        }
+    }
 
+    /**
+     * Gets the KeyStore
+     * @param context The Context of the application
+     * @param pwd The keyStore password
+     * @return The KeyStore
+     */
+    private static KeyStore getKeyStore(Context context, String pwd) {
         KeyStore keyStore = null;
         try {
-            keyStore = KeyStore.getInstance("AndroidKeyStore");
-        } catch (KeyStoreException e) {
-            logger.log(level, "No provider supports the specified type: " + e.toString());
-        }
-        if (file.exists()) {
-            // .keystore file already exists => load it
-            try {
-                keyStore.load(new FileInputStream(file), filePassword.toCharArray());
-
-            } catch ( NoSuchAlgorithmException e) {
-                logger.log(level, "No algorithm to check the keystore integrity:" + e.toString());
-            } catch ( CertificateException e) {
-                logger.log(level, "KeyStore Certificates cannot be loaded: " + e.toString());
-            } catch ( IOException e) {
-                keyStore = null;
-                logger.log(level, "Error on keyStore file password: " + e.toString());
-            }
-        } else {
-            // .keystore file not created yet => create it
-            try {
-                keyStore.load(null, null);
-                keyStore.store(new FileOutputStream(KEY_FILE_NAME), filePassword.toCharArray());
-            } catch ( NoSuchAlgorithmException e) {
-                logger.log(level, "The algorithm to check the integrity cannot be found: " + e.toString());
-            } catch ( CertificateException e) {
-                logger.log(level, "The certificate cannot be stored: " + e.toString());
-            } catch ( IOException e) {
-                logger.log(level, "I/O Problem with data to be stored: " + e.toString());
-            } catch ( KeyStoreException e) {
-                logger.log(level, "KeyStore not loaded: " + e.toString());
-            }
+            keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            FileInputStream fis = context.openFileInput(KEY_FILE_NAME);
+            keyStore.load(fis, pwd.toCharArray());
+            fis.close();
+        }  catch (Exception e) {
+            checkExceptions2(e);
         }
         return keyStore;
     }
 
     /**
+     * Saves the KeyStore
+     * @param context The context of the application
+     * @param keyStore KeyStore to be saved
+     * @param pwd  Password of the KeyStore
+     */
+    private static void saveKeyStore(Context context, KeyStore keyStore, String pwd) {
+        try {
+            FileOutputStream fos = context.openFileOutput(KEY_FILE_NAME, Context.MODE_PRIVATE);
+            keyStore.store(fos, pwd.toCharArray());
+            fos.close();
+        } catch (Exception e) {
+            checkExceptions2(e);
+        }
+    }
+
+    /**
      * This function test a password on a keystore
-     * @param password Password that is to be tried
+     * @param pwd Password that is to be tried
      * @return True if the password is correct, false otherwise
      */
-    static boolean testPassword(Context context, String password) {
-        File file = new File(context.getFilesDir(), KEY_FILE_NAME);
-        KeyStore keyStore = null;
+    static boolean testPassword(Context context, String pwd) {
         try {
-            keyStore = KeyStore.getInstance("JCEKS");
-        } catch (KeyStoreException e) {
-            logger.log(level, "No provider supports the specified type: " + e.toString());
-        }
-        if (file.exists()) {
-            // .keystore file already exists => load it
-            try {
-                keyStore.load(new FileInputStream(file), password.toCharArray());
-
-            } catch ( Exception e) {
-                logger.log(level, "Exception on testing password:" + e.toString());
-                return false;
-            }
+            FileInputStream fis = context.openFileInput(KEY_FILE_NAME);
+            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keyStore.load(fis, pwd.toCharArray());
+            fis.close();
+        } catch (IOException e) {
+            Log.e("CT: wrong pwd on test", Log.getStackTraceString(e));
+            return false;
+        }  catch (Exception e) {
+            Log.e("CT: Any Exc on pwd test", Log.getStackTraceString(e));
         }
         return true;
     }
 
     /**
      *Checks if the keystore file exists
+     * @param context Context of the application
      * @return True if the file exists, false otherwise
      */
     static boolean exists(Context context) {
         File file = new File(context.getFilesDir(), KEY_FILE_NAME);
-        return (file.exists());
+        if (file.exists()) {
+            return true;
+        } else {
+            try {
+                FileOutputStream fos = context.openFileOutput(KEY_FILE_NAME, Context.MODE_PRIVATE);
+                fos.close();
+                return false;
+            } catch (FileNotFoundException e){
+                Log.e("CT: File not found", Log.getStackTraceString(e));
+            } catch (IOException e){
+                Log.e("CT: IOEsc FI/OS close", Log.getStackTraceString(e));
+            }
+            return false;
+        }
     }
 
     /**
@@ -125,24 +136,21 @@ class Encryption {
      * @return Encrypted Data
      */
     static String encrypt( String key, String data ) {
-        byte[] encrypted = null;
-        IvParameterSpec iv = null;
         try {
-            iv = new IvParameterSpec(ENCRYPTION_IV.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            logger.log(level, "Impossible to generate IV: " + e.toString());
-        }
-        byte[] clear = data.getBytes();
-        SecretKeySpec secretKeySpec = new SecretKeySpec( key.getBytes(), "AES" );
-        try {
+            IvParameterSpec iv = new IvParameterSpec(ENCRYPTION_IV.getBytes("UTF-8"));
+            byte[] clear = data.getBytes();
+            SecretKeySpec secretKeySpec = new SecretKeySpec( key.getBytes(), "AES" );
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, iv);
-
-            encrypted = cipher.doFinal(clear);
+            byte[] encrypted = cipher.doFinal(clear);
+            return Base64.encodeToString(encrypted, Base64.DEFAULT);
+        } catch (UnsupportedEncodingException e) {
+            Log.e("CT: imp. IV gen.", Log.getStackTraceString(e));
+            return "";
         } catch (Exception e) {
-            checkExceptions (e);
+            checkExceptions1 (e);
+            return "";
         }
-        return Base64.encodeToString(encrypted, Base64.DEFAULT);
     }
 
     /**
@@ -163,7 +171,7 @@ class Encryption {
             byte[] encrypted = Base64.decode(encryptedData, Base64.DEFAULT);
             decrypted = cipher.doFinal(encrypted);
         } catch (Exception e) {
-            checkExceptions (e);
+            checkExceptions1 (e);
         }
         return new String(decrypted);
     }
@@ -183,93 +191,115 @@ class Encryption {
             keyGenerator.init( 256, secureRandom );
             return keyGenerator.generateKey();
         } catch (NoSuchAlgorithmException e) {
-            logger.log(level, "Unknown algorithm for key/random number generation: " + e.toString());
+            Log.e("CT: PRNG unk. algo", Log.getStackTraceString(e));
             return null;
         }
     }
 
     /**
      * Checked if a given entry is used to stock a key
+     * @param context The context of the application
      * @param entry Entry to be checked
-     * @param filePassword Password of the KeyStore file
+     * @param pwd Password of the KeyStore file
      * @return Whether the entry is stocked or not
      */
-    static boolean isStocked(Context context, String entry, String filePassword) {
-        KeyStore keyStore = createKeyStore(context, filePassword);
+    static boolean isStocked(Context context, String entry, String pwd) {
+        KeyStore keyStore = getKeyStore(context, pwd);
         boolean cond = false;
         try {
             cond = keyStore.containsAlias(entry);
         } catch (KeyStoreException e) {
-            logger.log(level, "KeyStore not loaded/initialized: " + e.toString());
+            Log.e("CT: ks not init.", Log.getStackTraceString(e));
         }
         return cond;
     }
 
     /**
      * Get a key from an alias
+     * @param context The context of the application
      * @param alias Alias of the searched key
-     * @param filePassword Password of the KeyStore file
+     * @param pwd Password of the KeyStore file
      * @return The searched key
      */
-    static String getKey(Context context, String alias, String filePassword) {
+    static String getKey(Context context, String alias, String pwd) {
+        KeyStore keyStore = getKeyStore(context, pwd);
+
         String key = "";
-        KeyStore keyStore = createKeyStore(context, filePassword);
         if (keyStore == null) {
             return null;
         }
         try {
-            key = keyStore.getKey(alias, filePassword.toCharArray()).toString();
+            key = keyStore.getKey(alias, pwd.toCharArray()).toString();
         } catch (KeyStoreException e) {
-            logger.log(level, "KeyStore is not loaded/initialized: " + e.toString());
+            Log.e("CT: ks not init", Log.getStackTraceString(e));
         } catch (NoSuchAlgorithmException e) {
-            logger.log(level, "No algorithm to find the key: " + e.toString());
+            Log.e("CT: no algo find key", Log.getStackTraceString(e));
         } catch (UnrecoverableKeyException e) {
-            logger.log(level, "Key cannot be recovered (wrong password): " + e.toString());
+            Log.e("CT: key unrecover.", Log.getStackTraceString(e));
         }
         return key;
     }
 
     /**
      * Saves a key from a seed
+     * @param context The context of the application
      * @param seed Seed to be used
-     * @param filePassword Password of the Keystore file
+     * @param pwd Password of the Keystore file
      * @param alias Alias to be given to the Key
      */
-    static void saveKey(Context context, String seed, String filePassword, String alias) {
-        KeyStore keyStore = createKeyStore(context, filePassword);
+    static void saveKey(Context context, String seed, String pwd, String alias) {
+        KeyStore keyStore = getKeyStore(context, pwd);
         if (keyStore == null) {
             return;
         }
-        KeyStore.PasswordProtection passwordProtection = new KeyStore.PasswordProtection(filePassword.toCharArray());
+        KeyStore.PasswordProtection passwordProtection = new KeyStore.PasswordProtection(pwd.toCharArray());
         try {
             if (seed.length() != 0) {
                 KeyStore.SecretKeyEntry keyStoreEntry = new KeyStore.SecretKeyEntry(Encryption.generateKey(seed.getBytes()));
                 keyStore.setEntry(alias, keyStoreEntry, passwordProtection);
             }
         } catch (KeyStoreException e) {
-            logger.log(level, "KeyStore is not loaded/initialized: " + e.toString());
+            Log.e("CT: ks not init.", Log.getStackTraceString(e));
         }
+
+        saveKeyStore(context, keyStore, pwd);
     }
 
     /**
      * Check an exception received when encrypting or decrypting data
      * @param e Exception to be checked
      */
-    private static void checkExceptions(Exception e){
+    private static void checkExceptions1(Exception e){
         if (e instanceof NoSuchAlgorithmException) {
-            logger.log(level, "Transformation invalid or no provider supports it: " + e.toString());
+            Log.e("CT: no provider transfo", Log.getStackTraceString(e));
         } if (e instanceof NoSuchPaddingException) {
-            logger.log(level, "The transformation contains a non-available pagging scheme: " + e.toString());
+            Log.e("CT: unavail. pad scheme", Log.getStackTraceString(e));
         } if (e instanceof InvalidKeyException) {
-            logger.log(level, "The Cipher could not be initialized to key parameter: " + e.toString());
+            Log.e("CT: cipher nor init.", Log.getStackTraceString(e));
         } if (e instanceof IllegalBlockSizeException) {
-            logger.log(level, "Error on BlockSize, you may verify padding scheme" + e.toString());
+            Log.e("CT: err on blocksize", Log.getStackTraceString(e));
         } if (e instanceof BadPaddingException) {
-            logger.log(level, "Decrypted data is not bounded by the appropriate padding bytes: " + e.toString());
+            Log.e("CT: padd bytes bound", Log.getStackTraceString(e));
         } if  (e instanceof UnsupportedEncodingException) {
-            logger.log(level, "Impossible to generate IV: " + e.toString());
+            Log.e("CT: imp gen. IV", Log.getStackTraceString(e));
         } if  (e instanceof InvalidAlgorithmParameterException){
-            logger.log(level, "Invalid Iv: " + e.toString());
+            Log.e("CT: invalid IV", Log.getStackTraceString(e));
+        }
+    }
+
+    /**
+     * Check an exception received when manipulating the keystore
+     * @param e Exception to be checked
+     */
+    private static void checkExceptions2(Exception e){
+        if (e instanceof NoSuchAlgorithmException) {
+            Log.e("CT: ks integ. unchk.", Log.getStackTraceString(e));
+        } if (e instanceof CertificateException) {
+            Log.e("CT: ks certif. unloaded", Log.getStackTraceString(e));
+        } if (e instanceof IOException) {
+            Log.e("CT: ks wrong password", Log.getStackTraceString(e));
+        } if (e instanceof KeyStoreException) {
+            Log.e("CT: no provider type", Log.getStackTraceString(e));
         }
     }
 }

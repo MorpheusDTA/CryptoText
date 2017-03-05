@@ -13,6 +13,8 @@ import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
+import android.text.Editable;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -23,11 +25,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.security.KeyException;
+import java.security.KeyStoreException;
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Activity for a conversation, the user can send messages, see the messages he received
@@ -37,10 +40,8 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     private String phoneNumber = "";
     private String keyStorePassword = "";
     private String contactName = "Unknown";
-    private static final Level level = Level.WARNING;
     private ArrayList<Integer> types = new ArrayList<>();
     private ArrayList<String> messages = new ArrayList<>();
-    private static Logger logger = Logger.getLogger(Encryption.class.getName());
 
     private ArrayList<String> getMessages() {
         return this.messages;
@@ -150,7 +151,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             keyStorePassword = (String) savedInstanceState.getSerializable("keyStorePassword");
         }
         // Manage the encryption checkbox
-        if (!Encryption.isStocked(getApplicationContext(), phoneNumber + "Out", keyStorePassword)) {
+        if (!Encryption.isStocked(getApplication(), phoneNumber + "Out", keyStorePassword)) {
             checkEncryption.setChecked(false);
             checkEncryption.setEnabled(false);
         }
@@ -177,7 +178,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         Cursor cursor = contentResolver.query(Uri.parse("content://sms/"), new String[]{"_id", "body", "date", "type", "seen"},
                 "address='" + phoneNumber + "'", null, null);
         if (cursor == null) {
-            logger.log(level, "Null Cursor on getting the text messages.");
+            Log.d("CT: null cursor SMS", "");
             return;
         }
         setMessagesAndTypes(cursor);
@@ -190,32 +191,32 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
      */
     public void send (View view) {
         CheckBox checkEncryption = (CheckBox) findViewById(R.id.checkEncryption);
-        EditText messageField = (EditText) findViewById(R.id.message);
-        String message = messageField.getText().toString();
+        Editable messageField = ((EditText) findViewById(R.id.message)).getText();
+        String message = messageField.toString(), toast;
 
+        SmsManager smsManager = SmsManager.getDefault();
+        // Encrypting if possible and wanted
+        if (Encryption.isStocked(getApplication(), phoneNumber + "Out", keyStorePassword) && checkEncryption.isChecked()) {
+            // If a key isStocked and encryption asked, the message is encrypted
+            String key = Encryption.getKey(getApplication(), phoneNumber + "Out", keyStorePassword);
+            message = Encryption.encrypt(key, message);//TODO rectify: pb
+        }
+        //Send SMS
         try {
-            SmsManager smsManager = SmsManager.getDefault();
-            Context context = getApplicationContext();
-            // Encrypting if possible and wanted
-            if (Encryption.isStocked(context, phoneNumber + "Out", keyStorePassword) && checkEncryption.isChecked()) {
-                // If a key isStocked and encryption asked, the message is encrypted
-                String key = Encryption.getKey(context, phoneNumber + "Out", keyStorePassword);
-                message = Encryption.encrypt(key, message);
-            }
-            //Send SMS
             smsManager.sendTextMessage(phoneNumber, null, message, null, null);
-            Toast.makeText(getApplicationContext(), R.string.sentTo + contactName, Toast.LENGTH_LONG).show();
             // Update the view
             getTypes().add(0);
             getMessages().add(getDate((long) 0) + "\n" + message);
             this.types = getTypes();
             setMessages(getMessages());
 
-            messageField.getText().clear();
+            messageField.clear();
+            toast = getString(R.string.sentTo) + contactName;
         } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), R.string.sendFail, Toast.LENGTH_LONG).show();
-            logger.log(level, "Failed sending SMS: " + e.toString());
+            toast = getString(R.string.sendFail);
+            Log.e("CT: SMS not sent", Log.getStackTraceString(e));
         }
+        Toast.makeText(getApplicationContext(), toast, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -250,7 +251,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         String message = txt.substring(idx + 1);
 
         String key = "";
-        Context context = getApplicationContext();
+        Context context = getApplication();
         // Get key
         if (types.get(position) == 1 && Encryption.isStocked(context, phoneNumber + "In", keyStorePassword)) {
             key = Encryption.getKey(context, phoneNumber + "In", keyStorePassword);
