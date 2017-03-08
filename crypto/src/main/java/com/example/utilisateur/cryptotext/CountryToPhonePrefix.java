@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Map of phone prefixes according to countries
  * @author DonatienTERTRAIS
  */
 class CountryToPhonePrefix {

@@ -55,7 +55,7 @@ public class SmsReceiver extends BroadcastReceiver {
             for (SmsMessage sms:messages) {
                 putSmsToDatabase( contentResolver, sms );
             }
-            text = "" + messages.length + R.string.newMsgs;
+            text = "" + messages.length + " new messages";
         }
 
         Toast.makeText(context, text, Toast.LENGTH_SHORT).show();

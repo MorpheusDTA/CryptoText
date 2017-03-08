@@ -20,6 +20,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -37,7 +38,8 @@
             android:label="@string/titleActivityConversation"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ModifyConversation" />
-        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".MainActivity" />
+        <activity android:name=".SeeKeys"></activity>
     </application>
 
 </manifest>

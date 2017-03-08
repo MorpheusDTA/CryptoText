@@ -25,12 +25,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.security.KeyException;
-import java.security.KeyStoreException;
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
+
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Activity for a conversation, the user can send messages, see the messages he received
@@ -40,8 +39,10 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     private String phoneNumber = "";
     private String keyStorePassword = "";
     private String contactName = "Unknown";
+    private static final int SMS_LIMIT = 160;
     private ArrayList<Integer> types = new ArrayList<>();
     private ArrayList<String> messages = new ArrayList<>();
+    private ArrayList<Integer> decrypted = new ArrayList<>();
 
     private ArrayList<String> getMessages() {
         return this.messages;
@@ -138,7 +139,6 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
         CheckBox checkEncryption = (CheckBox) findViewById(R.id.checkEncryption);
-        // Get info in the intent
         TextView contact = (TextView) findViewById(R.id.contact);
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
@@ -151,7 +151,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             keyStorePassword = (String) savedInstanceState.getSerializable("keyStorePassword");
         }
         // Manage the encryption checkbox
-        if (!Encryption.isStocked(getApplication(), phoneNumber + "Out", keyStorePassword)) {
+        if (!Encryption.isStocked(getApplication(), phoneNumber, keyStorePassword)) {
             checkEncryption.setChecked(false);
             checkEncryption.setEnabled(false);
         }
@@ -165,8 +165,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             cursor.close();
         }
 
-        String str = contactName + "/" + phoneNumber;
-        contact.setText(str);
+        contact.setText(contactName + "/" + phoneNumber);
         loadMessages(); // Load the messages into the list
     }
 
@@ -191,27 +190,29 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
      */
     public void send (View view) {
         CheckBox checkEncryption = (CheckBox) findViewById(R.id.checkEncryption);
-        Editable messageField = ((EditText) findViewById(R.id.message)).getText();
-        String message = messageField.toString(), toast;
+        EditText msgField = (EditText) findViewById(R.id.message);
+        Editable msgEdit = msgField.getText();
+        String message = msgEdit.toString(), toast;
 
         SmsManager smsManager = SmsManager.getDefault();
         // Encrypting if possible and wanted
-        if (Encryption.isStocked(getApplication(), phoneNumber + "Out", keyStorePassword) && checkEncryption.isChecked()) {
+        if (Encryption.isStocked(getApplication(), phoneNumber, keyStorePassword) && checkEncryption.isChecked()) {
             // If a key isStocked and encryption asked, the message is encrypted
-            String key = Encryption.getKey(getApplication(), phoneNumber + "Out", keyStorePassword);
-            message = Encryption.encrypt(key, message);//TODO rectify: pb
+            SecretKeySpec key = Encryption.getKey(getApplication(), phoneNumber, keyStorePassword);
+            message = Encryption.encrypt(key, message);
         }
-        //Send SMS
-        try {
+        if (message.length() >= SMS_LIMIT) { // The message is too short
+            messageTooLong(); return;
+        }
+        try {// Send SMS then update the view
             smsManager.sendTextMessage(phoneNumber, null, message, null, null);
-            // Update the view
             getTypes().add(0);
             getMessages().add(getDate((long) 0) + "\n" + message);
             this.types = getTypes();
             setMessages(getMessages());
 
-            messageField.clear();
-            toast = getString(R.string.sentTo) + contactName;
+            msgEdit.clear();
+            toast = getString(R.string.sentTo) + " " + contactName;
         } catch (Exception e) {
             toast = getString(R.string.sendFail);
             Log.e("CT: SMS not sent", Log.getStackTraceString(e));
@@ -219,19 +220,14 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         Toast.makeText(getApplicationContext(), toast, Toast.LENGTH_LONG).show();
     }
 
-    @Override
-    // On click of a text message : decrypt it
-    public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
+    /**
+     * Function called if the message is too long
+     */
+    private void messageTooLong () {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle(R.string.decryption);
-        alert.setPositiveButton(R.string.decrypt, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                decrypt( position );
-            }
-        });
-        alert.setNegativeButton(R.string.goBack, new DialogInterface.OnClickListener() {
+        alert.setTitle(R.string.warnings);
+        alert.setMessage(R.string.tooLong);
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -240,28 +236,23 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         alert.show();
     }
 
-    /**
-     * Decryption of the sms on the given position of the list
-     * @param position Position of the SMS in the list
-     */
-    private void decrypt(int position) {
-        String txt = messages.get(position);
-        int idx = txt.indexOf("\n");
-        String date = txt.substring(0, idx);
-        String message = txt.substring(idx + 1);
+    @Override
+    // On click on a text message : decrypt it
+    public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
+        if (!decrypted.contains(position)) {
+            String txt = messages.get(position);
+            int idx = txt.indexOf("\n");
+            String date = txt.substring(0, idx);
+            String message = txt.substring(idx + 1);
 
-        String key = "";
-        Context context = getApplication();
-        // Get key
-        if (types.get(position) == 1 && Encryption.isStocked(context, phoneNumber + "In", keyStorePassword)) {
-            key = Encryption.getKey(context, phoneNumber + "In", keyStorePassword);
-        } else if (types.get(position) == 2 && Encryption.isStocked(context, phoneNumber + "Out", keyStorePassword)) {
-            key = Encryption.getKey(context, phoneNumber + "Out", keyStorePassword);
+            Context context = getApplication();
+            SecretKeySpec key = Encryption.getKey(context, phoneNumber, keyStorePassword);
+            message = Encryption.decrypt(key, message);
+            //message = Base64.encodeToString(key.getEncoded(), Base64.DEFAULT);
+            decrypted.add(position);
+            messages.set(position, date + "\n" + message);
+            setMessages(messages);
         }
-        message = Encryption.decrypt(key, message);
-
-        messages.set(position, date + "\n" + message);
-        setMessages(messages);// TODO slight mistake : impossible to have several sms decrypted in the view
     }
 
     /*private void saveSMS(String encryptedBody, String body, String date) {

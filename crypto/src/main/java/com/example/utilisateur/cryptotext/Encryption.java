@@ -13,6 +13,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyStore;
+import java.security.KeyStore.SecretKeyEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -135,13 +136,12 @@ class Encryption {
      * @param data data to be encrypted
      * @return Encrypted Data
      */
-    static String encrypt( String key, String data ) {
+    static String encrypt(SecretKeySpec key, String data ) {
         try {
             IvParameterSpec iv = new IvParameterSpec(ENCRYPTION_IV.getBytes("UTF-8"));
             byte[] clear = data.getBytes();
-            SecretKeySpec secretKeySpec = new SecretKeySpec( key.getBytes(), "AES" );
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, iv);
+            cipher.init(Cipher.ENCRYPT_MODE, key, iv);
             byte[] encrypted = cipher.doFinal(clear);
             return Base64.encodeToString(encrypted, Base64.DEFAULT);
         } catch (UnsupportedEncodingException e) {
@@ -159,14 +159,13 @@ class Encryption {
      * @param encryptedData Data to be Decrypted
      * @return Decrypted data
      */
-    static String decrypt( String key, String encryptedData ) {
+    static String decrypt(SecretKeySpec key, String encryptedData ) {
         IvParameterSpec iv;
-        SecretKeySpec secretKeySpec = new SecretKeySpec( key.getBytes(), "AES" );
         byte[] decrypted = new byte[]{};
         try {
             iv = new IvParameterSpec(ENCRYPTION_IV.getBytes("UTF-8"));
-            Cipher cipher = Cipher.getInstance( "AES/CBC/PKCS5Padding" );
-            cipher.init( Cipher.DECRYPT_MODE, secretKeySpec, iv);
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init( Cipher.DECRYPT_MODE, key, iv);
 
             byte[] encrypted = Base64.decode(encryptedData, Base64.DEFAULT);
             decrypted = cipher.doFinal(encrypted);
@@ -178,20 +177,18 @@ class Encryption {
 
     /**
      * Generate a key from a given seed
-     * @param seed Seed of the key
      * @return Key generated
      */
-    private static SecretKey generateKey( byte[] seed ) {
-        KeyGenerator keyGenerator;
-        SecureRandom secureRandom;
+    static SecretKey generateKey() {
+        // Generate a 256-bit key
+        final int outputKeyLength = 256;
+        SecureRandom secureRandom = new SecureRandom();
         try {
-            keyGenerator = KeyGenerator.getInstance( "AES" );
-            secureRandom = SecureRandom.getInstance( "SHA1PRNG" );
-            secureRandom.setSeed( seed );
-            keyGenerator.init( 256, secureRandom );
+            KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+            keyGenerator.init(outputKeyLength, secureRandom);
             return keyGenerator.generateKey();
         } catch (NoSuchAlgorithmException e) {
-            Log.e("CT: PRNG unk. algo", Log.getStackTraceString(e));
+            Log.e("CT: cannot gen key", Log.getStackTraceString(e));
             return null;
         }
     }
@@ -221,48 +218,60 @@ class Encryption {
      * @param pwd Password of the KeyStore file
      * @return The searched key
      */
-    static String getKey(Context context, String alias, String pwd) {
+    static SecretKeySpec getKey(Context context, String alias, String pwd) {
         KeyStore keyStore = getKeyStore(context, pwd);
 
-        String key = "";
-        if (keyStore == null) {
-            return null;
-        }
+        if (keyStore == null) return null;
+
         try {
-            key = keyStore.getKey(alias, pwd.toCharArray()).toString();
+            return (SecretKeySpec) keyStore.getKey(alias, pwd.toCharArray());
         } catch (KeyStoreException e) {
             Log.e("CT: ks not init", Log.getStackTraceString(e));
+            return null;
         } catch (NoSuchAlgorithmException e) {
             Log.e("CT: no algo find key", Log.getStackTraceString(e));
+            return null;
         } catch (UnrecoverableKeyException e) {
             Log.e("CT: key unrecover.", Log.getStackTraceString(e));
+            return null;
         }
-        return key;
     }
 
     /**
-     * Saves a key from a seed
+     * Saves a key
      * @param context The context of the application
-     * @param seed Seed to be used
+     * @param key Key to be saved
      * @param pwd Password of the Keystore file
      * @param alias Alias to be given to the Key
      */
-    static void saveKey(Context context, String seed, String pwd, String alias) {
+    static void saveKey(Context context, SecretKey key, String pwd, String alias) {
         KeyStore keyStore = getKeyStore(context, pwd);
-        if (keyStore == null) {
-            return;
-        }
+        if (keyStore == null) return;
         KeyStore.PasswordProtection passwordProtection = new KeyStore.PasswordProtection(pwd.toCharArray());
         try {
-            if (seed.length() != 0) {
-                KeyStore.SecretKeyEntry keyStoreEntry = new KeyStore.SecretKeyEntry(Encryption.generateKey(seed.getBytes()));
-                keyStore.setEntry(alias, keyStoreEntry, passwordProtection);
-            }
+            /*byte[] key = keyStr.getBytes("UTF-16LE");
+            SecretKey secretKey = new SecretKeySpec(key, 0, 256, "AES");
+            SecretKey secretKey = Encryption.generateKey(key);*/
+            SecretKeyEntry keyStoreEntry = new SecretKeyEntry(key);
+            keyStore.setEntry(alias, keyStoreEntry, passwordProtection);
+            saveKeyStore(context, keyStore, pwd);
         } catch (KeyStoreException e) {
             Log.e("CT: ks not init.", Log.getStackTraceString(e));
         }
+    }
 
-        saveKeyStore(context, keyStore, pwd);
+    /**
+     * Delete a key that is to be overwritten
+     * @param context Contextof the application
+     * @param alias Key's alias in the keystore
+     * @param pwd Password of the keystore
+     */
+    static void deleteKey(Context context, String alias, String pwd) {
+        try {
+            getKeyStore(context, pwd).deleteEntry(alias);
+        } catch (KeyStoreException e) {
+            Log.e("CT: cannot delete key", Log.getStackTraceString(e));
+        }
     }
 
     /**
