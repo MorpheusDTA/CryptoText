@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/contactName"
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:layout_below="@+id/phoneField"
         android:layout_alignStart="@+id/phoneField"
         android:layout_marginTop="12dp"
@@ -31,7 +31,7 @@
         android:enabled="true"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:textSize="16sp" />
+        android:textSize="18sp" />
 
     <Button
         android:layout_width="wrap_content"
@@ -41,7 +41,7 @@
         android:onClick="goToConversation"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:textSize="16sp" />
+        android:textSize="18sp" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -64,7 +64,7 @@
         android:ems="10"
         android:id="@+id/pwdField"
         android:hint="@string/keyPassword"
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:layout_marginTop="17dp"
         android:maxLines="1"
         android:layout_below="@+id/contactName"
@@ -77,7 +77,7 @@
         android:id="@+id/createKeys"
         android:onClick="createKey"
         android:layout_marginBottom="16dp"
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:layout_above="@+id/createConversation"
         android:layout_centerHorizontal="true" />
 

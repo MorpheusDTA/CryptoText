@@ -5,11 +5,11 @@
     <item
         android:id="@+id/seeKeys"
         android:orderInCategory="100"
-        android:title="@string/seeKeys"
+        android:title="@string/seeKeysOption"
         app:showAsAction="never" />
     <item
         android:id="@+id/changePassword"
         android:orderInCategory="100"
-        android:title="@string/changePassword"
+        android:title="@string/changePwdOption"
         app:showAsAction="never" />
 </menu>

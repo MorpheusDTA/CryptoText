@@ -1,6 +1,9 @@
 package com.example.utilisateur.cryptotext;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.ContactsContract;
 import android.util.Base64;
 import android.util.Log;
 
@@ -12,13 +15,18 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStore.SecretKeyEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.UnrecoverableEntryException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -31,6 +39,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 /**
  * The keys are stocked in a file protected with a password which is to be given before opening and creating a conversation
+ * This class contains the main methods dealing with key nd keystore management
  * @author DonatienTERTRAIS
  */
 class Encryption {
@@ -249,9 +258,6 @@ class Encryption {
         if (keyStore == null) return;
         KeyStore.PasswordProtection passwordProtection = new KeyStore.PasswordProtection(pwd.toCharArray());
         try {
-            /*byte[] key = keyStr.getBytes("UTF-16LE");
-            SecretKey secretKey = new SecretKeySpec(key, 0, 256, "AES");
-            SecretKey secretKey = Encryption.generateKey(key);*/
             SecretKeyEntry keyStoreEntry = new SecretKeyEntry(key);
             keyStore.setEntry(alias, keyStoreEntry, passwordProtection);
             saveKeyStore(context, keyStore, pwd);
@@ -268,7 +274,9 @@ class Encryption {
      */
     static void deleteKey(Context context, String alias, String pwd) {
         try {
-            getKeyStore(context, pwd).deleteEntry(alias);
+            KeyStore keyStore = getKeyStore(context, pwd);
+            keyStore.deleteEntry(alias);
+            saveKeyStore(context, keyStore, pwd);
         } catch (KeyStoreException e) {
             Log.e("CT: cannot delete key", Log.getStackTraceString(e));
         }
@@ -310,5 +318,97 @@ class Encryption {
         } if (e instanceof KeyStoreException) {
             Log.e("CT: no provider type", Log.getStackTraceString(e));
         }
+    }
+
+    /**
+     * Gets all keys stored in the keyStore
+     * @param context Context of the app
+     * @param pwd Password of the KeyStore
+     * @return List of the aliases and the string representations of the corresponding key
+     */
+    static ArrayList<String> getKeys(Context context, String pwd) {
+        KeyStore keyStore = getKeyStore(context, pwd);
+        if (keyStore == null) return null;
+        ArrayList<String> list = new ArrayList<>();
+        try {
+            Enumeration<String> aliases = keyStore.aliases();
+            while (aliases.hasMoreElements()) {
+                String alias = aliases.nextElement();
+                Key key = keyStore.getKey(alias, pwd.toCharArray());
+
+                // Get the contact name
+                Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(alias));
+                Cursor cursor = context.getContentResolver().query(uri, new String[]{ContactsContract.Data.DISPLAY_NAME}, null, null, null);
+                if (cursor != null) {
+                    if (cursor.moveToFirst()) {
+                        alias = alias + "/" + cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+                    }
+                    cursor.close();
+                }
+
+                if (key != null) {
+                    String keyStr = Base64.encodeToString(key.getEncoded(), Base64.DEFAULT);
+                    list.add(alias + "\n" + keyStr);
+                }
+            }
+        } catch (KeyStoreException e) {
+            Log.e("CT: cannot get aliases", Log.getStackTraceString(e));
+        } catch (NoSuchAlgorithmException e) {
+            Log.e("CT: cannot get a key", Log.getStackTraceString(e));
+        } catch (UnrecoverableKeyException e) {
+            Log.e("CT: cannot recover key", Log.getStackTraceString(e));
+        }
+        return list;
+    }
+
+    /**
+     * Changes the password of the keystore file
+     * @param context Context of the app
+     * @param oldPwd Former password
+     * @param newPwd New password
+     * @return If the change was successful
+     */
+    static boolean changePwd(Context context, String oldPwd, String newPwd) {
+        KeyStore keyStore = getKeyStore(context, oldPwd);
+        if (keyStore == null) return false;
+        HashMap<String, SecretKeyEntry> hashMap = new HashMap<>();//map of the aliases-secret keys
+        ArrayList<String> aliasList = new ArrayList<>();//list of the aliases
+        try {
+            KeyStore.PasswordProtection newPwdProtec = new KeyStore.PasswordProtection(newPwd.toCharArray());
+            KeyStore.PasswordProtection oldPwdProtec = new KeyStore.PasswordProtection(oldPwd.toCharArray());
+            Enumeration<String> aliases = keyStore.aliases();
+
+            while (aliases.hasMoreElements()) {// Stock the keys and aliases in the hashMap
+                String alias = aliases.nextElement();
+                aliasList.add(alias);
+                SecretKeyEntry key = (SecretKeyEntry) keyStore.getEntry(alias, oldPwdProtec);
+                if (key != null) {
+                    hashMap.put(alias, key);
+                }
+            }
+
+            saveKeyStore(context, keyStore, oldPwd);
+            context.deleteFile(KEY_FILE_NAME);// delete keystore and recreate it with the new password
+            exists(context);
+            createKeyStore(context, newPwd);
+
+            KeyStore keyStore2 = getKeyStore(context, newPwd);//Reload the keystore, save the key and save the keystore
+            for (String alias : aliasList) {
+                SecretKeyEntry key = hashMap.get(alias);
+                keyStore2.setEntry(alias, key, newPwdProtec);
+            }
+
+            saveKeyStore(context, keyStore2, newPwd);
+            return true;
+        } catch (KeyStoreException e) {
+            Log.e("CT: cannot get aliases", Log.getStackTraceString(e));
+        } catch (NoSuchAlgorithmException e) {
+            Log.e("CT: cannot get a key", Log.getStackTraceString(e));
+        } catch (UnrecoverableKeyException e) {
+            Log.e("CT: cannot recover key", Log.getStackTraceString(e));
+        } catch (UnrecoverableEntryException e) {
+            Log.e("CT: cant recover entry", Log.getStackTraceString(e));
+        }
+        return false;
     }
 }

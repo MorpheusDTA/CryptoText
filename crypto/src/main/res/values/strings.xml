@@ -5,21 +5,21 @@
     <!-- EnterPassword class/xml -->
     <string name="nullPwd">Password Fields can not be empty</string>
     <string name="noMatchPassword">Passwords do not match or are too short. Please Confirm again.</string>
-    <string name="enterPassword">Enter new password</string>
+    <string name="enterPassword">Enter password</string>
     <string name="confirmPassword">Confirm Password</string>
     <string name="saveChanges">Save Changes</string>
     <string name="enterKSPwd">Please Enter the KeyStore File Password</string>
     <!-- MainActivity class/xml -->
     <string name="conversation">Conversation</string>
-    <string name="seeKeys">See All Keys</string>
-    <string name="changePassword">Change The KeyStore Password</string>
+    <string name="seeKeysOption">See All Keys</string>
+    <string name="changePwdOption">Change The KeyStore Password</string>
     <!-- ModifyConversation class/xml -->
     <string name="warnings">Warnings</string>
     <string name="tooLong">The SMS is too long. Please make it shorter.</string>
     <string name="invalidDataPwd">Incorrect password</string>
     <string name="invalidDataKey">Key is 45 char finishing with \'=\'</string>
     <string name="keyOverW">The current key will be overwritten</string>
-    <string name="continueStr">Overwrite them</string>
+    <string name="overwrite">Overwrite it</string>
     <string name="goBack">Go Back</string>
     <string name="phoneNumber">Phone Number</string>
     <string name="goToConversation">Go to Conversation</string>
@@ -38,4 +38,18 @@
     <string name="checkEncryption">Encrypt outgoing SMS</string>
     <!-- SmsReceiver class -->
     <string name="newMsgs">new messages</string>
+    <!-- SeeKeys class/xml -->
+    <string name="msgSeeKeys">Please enter your KeyStore password</string>
+    <string name="wrongPassword">Password is not correct. Please Try again</string>
+    <string name="deleteKey">Are you sure to delete this key :</string>
+    <string name="delete">Delete</string>
+    <!-- ChangePassword class/xml -->
+    <string name="changePwd">Change Password</string>
+    <string name="oldPwd">Former Password</string>
+    <string name="newPwd">New Password</string>
+    <string name="newPwdConf">Confirm New Password</string>
+    <string name="chgPwdInfo">Please enter the following data :</string>
+    <string name="wrongOldPwd">Former password is wrong. Please try again.</string>
+    <string name="pwdNoMatch">New passwords do not match. Please try again.</string>
+    <string name="changeFailed">The change failed. Please try again.</string>
 </resources>

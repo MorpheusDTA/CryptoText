@@ -31,6 +31,12 @@ import java.util.Calendar;
 
 import javax.crypto.spec.SecretKeySpec;
 
+import static com.example.utilisateur.cryptotext.Constants.MESSAGE_IS_NOT_READ;
+import static com.example.utilisateur.cryptotext.Constants.MESSAGE_IS_READ;
+import static com.example.utilisateur.cryptotext.Constants.PASSWORD;
+import static com.example.utilisateur.cryptotext.Constants.PHONE;
+import static com.example.utilisateur.cryptotext.Constants.SMS_LIMIT;
+
 /**
  * Activity for a conversation, the user can send messages, see the messages he received
  * @author DonatienTertrais
@@ -39,7 +45,6 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     private String phoneNumber = "";
     private String keyStorePassword = "";
     private String contactName = "Unknown";
-    private static final int SMS_LIMIT = 160;
     private ArrayList<Integer> types = new ArrayList<>();
     private ArrayList<String> messages = new ArrayList<>();
     private ArrayList<Integer> decrypted = new ArrayList<>();
@@ -119,9 +124,9 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         String message;
         while( nextCursor ){ // Read the sms cursor, modify if there are unread sms
             message = getDate(cursor.getLong(indexes[0])) + "\n" + cursor.getString(indexes[1]);
-            if (cursor.getInt(indexes[3]) == SmsReceiver.MESSAGE_IS_NOT_READ) {
+            if (cursor.getInt(indexes[3]) == MESSAGE_IS_NOT_READ) {
                 ContentValues values = new ContentValues();
-                values.put("seen",SmsReceiver.MESSAGE_IS_READ);
+                values.put("seen", MESSAGE_IS_READ);
                 getContentResolver().update(Uri.parse("content://sms/inbox"),values,
                         "_id="+cursor.getString(indexes[4]), null);
             }
@@ -143,12 +148,12 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if(extras != null) {
-                phoneNumber = extras.getString(MainActivity.PHONE);
-                keyStorePassword = extras.getString("keyStorePassword");
+                phoneNumber = extras.getString(PHONE);
+                keyStorePassword = extras.getString(PASSWORD);
             }
         } else {
-            phoneNumber = (String) savedInstanceState.getSerializable(MainActivity.PHONE);
-            keyStorePassword = (String) savedInstanceState.getSerializable("keyStorePassword");
+            phoneNumber = (String) savedInstanceState.getSerializable(PHONE);
+            keyStorePassword = (String) savedInstanceState.getSerializable(PASSWORD);
         }
         // Manage the encryption checkbox
         if (!Encryption.isStocked(getApplication(), phoneNumber, keyStorePassword)) {

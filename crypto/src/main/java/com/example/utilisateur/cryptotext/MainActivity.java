@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,12 +24,13 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 
+import static com.example.utilisateur.cryptotext.Constants.PHONE;
+
 /**
  * Asks for the password of the keystore file and creates it
  * @author DonatienTERTRAIS
  */
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
-    public static String PHONE = "phoneNumber";
     private ArrayList<Integer> seenList = new ArrayList<>();
     private ArrayList<String> conversationList = new ArrayList<>();
 
@@ -48,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 if (seenList.get(position) == 0) {// unseen
                     row.setBackgroundColor(Color.rgb(230, 240, 255));//light blue
                 } else {// seen
-                    row.setBackgroundColor(Color.rgb(255, 255, 255));// white
+                    row.setBackgroundColor(Color.rgb(255, 255, 255));//white
                 }
                 return row;
             }
@@ -61,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (savedInstanceState != null) update();
         update();
     }
 
@@ -92,11 +95,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 intent = new Intent(this, SeeKeys.class);
                 startActivity(intent);
                 break;
-            /*case R.id.changePassword:
+            case R.id.changePassword:
                 intent = new Intent(this, ChangePassword.class);
                 startActivity(intent);
-                return true;
-                break;*/
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -159,8 +161,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     /**
-     * When a coversation is clicked, go to the ModifyConversation Activity
-     *
+     * When a conversation is clicked, go to the ModifyConversation Activity
      * @param parent The AdapterView where the click happened.
      * @param view The view within the AdapterView that was clicked (this will be a view provided by the adapter)
      * @param pos The position of the view in the adapter.

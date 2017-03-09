@@ -17,7 +17,6 @@ public class EnterPassword extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //TODO create the file, if it exists go to next else, create keystore
         if (Encryption.exists(getApplication())){
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
@@ -35,8 +34,8 @@ public class EnterPassword extends AppCompatActivity {
         pwdConfirmation.clear();
 
         if (pwdStr.isEmpty() || pwdConfirmationStr.isEmpty()){
-            info.setText(R.string.nullPwd);
             info.setTextColor(Color.RED);
+            info.setText(R.string.nullPwd);
         }
 
         if(pwdStr.equals(pwdConfirmationStr)) {
@@ -44,8 +43,8 @@ public class EnterPassword extends AppCompatActivity {
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         } else {
-            info.setText(R.string.noMatchPassword);
             info.setTextColor(Color.RED);
+            info.setText(R.string.noMatchPassword);
         }
     }
 }

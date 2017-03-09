@@ -21,6 +21,9 @@ import android.widget.TextView;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import static com.example.utilisateur.cryptotext.Constants.PASSWORD;
+import static com.example.utilisateur.cryptotext.Constants.PHONE;
+
 /**
  * In this activity, the user can save some encryption/decryption key
  * @author DonatienTertrais
@@ -29,8 +32,7 @@ public class ModifyConversation extends AppCompatActivity {
     private String phoneNumber;
     private static final int KEY_LENGTH = 45;
     private static SecretKey key = null;
-    private static String keyStr = null;
-    private static String pwd = null;
+    private static String keyStr = "";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -40,11 +42,11 @@ public class ModifyConversation extends AppCompatActivity {
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if (extras != null) {
-                phoneNumber = extras.getString(MainActivity.PHONE);
+                phoneNumber = extras.getString(PHONE);
                 setPhoneAndContact();
             }
         } else {
-            phoneNumber = (String) savedInstanceState.getSerializable(MainActivity.PHONE);
+            phoneNumber = (String) savedInstanceState.getSerializable(PHONE);
             setPhoneAndContact();
         }
     }
@@ -76,7 +78,7 @@ public class ModifyConversation extends AppCompatActivity {
         Editable phoneField = ((EditText) findViewById(R.id.phoneField)).getText(),
                  pwdField = ((EditText) findViewById(R.id.pwdField)).getText(),
                  keyField = ((EditText) findViewById(R.id.keyField)).getText();
-        keyStr = keyField.toString(); pwd = pwdField.toString(); phoneNumber = formatNumber(phoneField.toString());
+        keyStr = keyField.toString(); String pwd = pwdField.toString(); phoneNumber = formatNumber(phoneField.toString());
         if (phoneNumber == null) {
             EditText phField = (EditText) findViewById(R.id.phoneField);
             phField.setTextColor(Color.RED);
@@ -84,16 +86,16 @@ public class ModifyConversation extends AppCompatActivity {
             return;
         }
         pwdField.clear(); keyField.clear();
+        if (checkForErrors(pwd)) return;// Check if there are errors in the data
 
-        if (keyStr.length() == 0) {//If no key is asked, ok
+        if (keyStr.isEmpty()) {//If no key is asked, ok
             Intent intent = new Intent(this, Conversation.class);
-            intent.putExtra(MainActivity.PHONE, phoneNumber);
-            intent.putExtra("keyStorePassword", pwd);
-            key = null; keyStr = ""; pwd = "";//Clear sensitive data
+            intent.putExtra(PHONE, phoneNumber);
+            intent.putExtra(PASSWORD, pwd);
+            key = null; keyStr = "";//Clear sensitive data
             startActivity(intent);
         }
 
-        if (checkForErrors()) return;// Check if there are errors in the data
         // Save the key
         Context context = getApplication();
         if (!keyStr.isEmpty()) {//A key is to be saved
@@ -102,16 +104,16 @@ public class ModifyConversation extends AppCompatActivity {
                 key = new SecretKeySpec(keyByte, 0, 256, "AES");
             }
             if (Encryption.isStocked(context, phoneNumber, pwd)) {//Check if key will be overwritten
-                createAlertDialog(this); return;
+                createAlertDialog(this, pwd); return;
             } else {
                 Encryption.saveKey(context, key, pwd, phoneNumber);//Save Key
             }
         }
 
         Intent intent = new Intent(this, Conversation.class);
-        intent.putExtra(MainActivity.PHONE, phoneNumber);
-        intent.putExtra("keyStorePassword", pwd);
-        key = null; keyStr = ""; pwd = "";//Clear sensitive data
+        intent.putExtra(PHONE, phoneNumber);
+        intent.putExtra(PASSWORD, pwd);
+        key = null; keyStr = "";//Clear sensitive data
         startActivity(intent);
     }
 
@@ -131,18 +133,18 @@ public class ModifyConversation extends AppCompatActivity {
 
     /**
      * Checks if there are errors with the password or the keys
+     * @param pwd Password of the KeyStore
      * @return True if an error was spotted
      */
-    private boolean checkForErrors () {
+    private boolean checkForErrors (String pwd) {
         if (!Encryption.testPassword(getApplication(), pwd)) {// Check if the password is correct
             TextView pwdField = (TextView) findViewById(R.id.pwdField);
-            pwdField.setTextColor(Color.RED);
             pwdField.setHint(R.string.invalidDataPwd);
             return true;
         }
         int lg = keyStr.length();
         boolean endsWith = keyStr.endsWith("=");
-        if (key == null && !(lg == KEY_LENGTH && endsWith) ) {
+        if (key == null && !(lg == KEY_LENGTH && endsWith) && !keyStr.isEmpty()) {
             // String was not created, to be checked : right end and right length
             TextView eKeyField = (TextView) findViewById(R.id.keyField);
             eKeyField.setTextColor(Color.RED);
@@ -154,22 +156,24 @@ public class ModifyConversation extends AppCompatActivity {
 
     /**
      * Create alert window when there are some errors
+     * @param context Context of the application
+     * @param pwd Password of the KeyStore
      */
-    private void createAlertDialog(final Context context) {
+    private void createAlertDialog(final Context context, final String pwd) {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle(R.string.warnings);
         String msg = getString(R.string.warnings) + " :\n" + getString(R.string.keyOverW);
         alert.setMessage(msg);
-        alert.setPositiveButton(R.string.continueStr, new DialogInterface.OnClickListener() {
+        alert.setPositiveButton(R.string.overwrite, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
                 Encryption.deleteKey(getApplication(), phoneNumber, pwd);
                 Encryption.saveKey(getApplication(), key, pwd, phoneNumber);//Save reception key
                 Intent intent = new Intent(context, Conversation.class);
-                intent.putExtra(MainActivity.PHONE, phoneNumber);
-                intent.putExtra("keyStorePassword", pwd);
-                key = null; keyStr = ""; pwd = "";//Clear sensitive data
+                intent.putExtra(PHONE, phoneNumber);
+                intent.putExtra(PASSWORD, pwd);
+                key = null; keyStr = "";//Clear sensitive data
                 startActivity(intent);
             }
         });

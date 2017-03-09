@@ -13,14 +13,12 @@ import android.widget.Toast;
 import android.provider.Telephony.Sms.Intents;
 import android.provider.Telephony.TextBasedSmsColumns;
 
+import static com.example.utilisateur.cryptotext.Constants.MESSAGE_IS_NOT_READ;
+
 /**
  * @author DonatienTERTRAIS
  */
 public class SmsReceiver extends BroadcastReceiver {
-
-    public static final int MESSAGE_IS_NOT_READ = 0;
-    public static final int MESSAGE_IS_READ = 1;
-
     // Change the password here or give a user possibility to change it
     //public static final byte[] PASSWORD = new byte[]{ 0x20, 0x32, 0x34, 0x47, (byte) 0x84, 0x33, 0x58 };
 
