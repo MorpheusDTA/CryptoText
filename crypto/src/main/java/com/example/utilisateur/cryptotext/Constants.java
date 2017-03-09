@@ -1,7 +1,7 @@
 package com.example.utilisateur.cryptotext;
 
 /**
- * Stocks different constants for the app
+ * Stores different constants for the app
  * @author DonatienTERTRAIS
  */
 class Constants {
@@ -10,7 +10,7 @@ class Constants {
     final static int SMS_LIMIT = 160;
     static final int MESSAGE_IS_READ = 1;
     static final int MESSAGE_IS_NOT_READ = 0;
-    final static int PASSWORD_MIN_LLENGTH = 8;
+    //final static int PASSWORD_MIN_LLENGTH = 8;
 
 
 }

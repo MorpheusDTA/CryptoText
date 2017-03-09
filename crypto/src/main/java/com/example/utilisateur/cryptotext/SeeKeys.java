@@ -3,14 +3,10 @@ package com.example.utilisateur.cryptotext;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -19,7 +15,7 @@ import android.widget.ListView;
 import java.util.ArrayList;
 
 public class SeeKeys extends AppCompatActivity implements AdapterView.OnItemLongClickListener {
-    ArrayList<String> keysList = new ArrayList<>();
+    private ArrayList<String> keysList = new ArrayList<>();
     private static String pwd = "";
 
     @Override
@@ -70,7 +66,7 @@ public class SeeKeys extends AppCompatActivity implements AdapterView.OnItemLong
         keysList = Encryption.getKeys(getApplication(), pwd);
         ListView keysListView = (ListView) findViewById(R.id.keysList);
         if (keysList == null) return;
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, keysList);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, keysList);
         keysListView.setAdapter(adapter);
         keysListView.setOnItemLongClickListener(this);
         pwd = "";
@@ -101,19 +97,5 @@ public class SeeKeys extends AppCompatActivity implements AdapterView.OnItemLong
         });
         alert.show();
         return true;
-    }
-
-    /**
-     * To close the app on return pressed instead of going to EnterPassword
-     * @param keyCode Code of the key pressed
-     * @param event Event of the key pressed
-     * @return
-     */
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK ) {
-            keysList = null;
-        }
-        return super.onKeyDown(keyCode, event);
     }
 }

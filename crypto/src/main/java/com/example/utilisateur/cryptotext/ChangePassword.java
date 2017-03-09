@@ -9,6 +9,10 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+/**
+ * Activity enabling the user to change the keystore password
+ * @author DonatienTertrais
+ */
 public class ChangePassword extends AppCompatActivity {
 
     @Override
