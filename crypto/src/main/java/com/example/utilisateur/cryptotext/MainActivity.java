@@ -87,18 +87,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         Intent intent;
-        /*switch(id){
+        switch(id){
             case R.id.seeKeys:
                 intent = new Intent(this, SeeKeys.class);
                 startActivity(intent);
-                return true;
                 break;
-            case R.id.changePassword:
+            /*case R.id.changePassword:
                 intent = new Intent(this, ChangePassword.class);
                 startActivity(intent);
                 return true;
-                break;
-        }*/
+                break;*/
+        }
         return super.onOptionsItemSelected(item);
     }
 

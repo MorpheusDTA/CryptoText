@@ -102,7 +102,7 @@ public class ModifyConversation extends AppCompatActivity {
                 key = new SecretKeySpec(keyByte, 0, 256, "AES");
             }
             if (Encryption.isStocked(context, phoneNumber, pwd)) {//Check if key will be overwritten
-                createAlertDialog(); return;
+                createAlertDialog(this); return;
             } else {
                 Encryption.saveKey(context, key, pwd, phoneNumber);//Save Key
             }
@@ -155,7 +155,7 @@ public class ModifyConversation extends AppCompatActivity {
     /**
      * Create alert window when there are some errors
      */
-    private void createAlertDialog() {
+    private void createAlertDialog(final Context context) {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle(R.string.warnings);
         String msg = getString(R.string.warnings) + " :\n" + getString(R.string.keyOverW);
@@ -166,7 +166,7 @@ public class ModifyConversation extends AppCompatActivity {
                 dialog.dismiss();
                 Encryption.deleteKey(getApplication(), phoneNumber, pwd);
                 Encryption.saveKey(getApplication(), key, pwd, phoneNumber);//Save reception key
-                Intent intent = new Intent(getParent(), Conversation.class);
+                Intent intent = new Intent(context, Conversation.class);
                 intent.putExtra(MainActivity.PHONE, phoneNumber);
                 intent.putExtra("keyStorePassword", pwd);
                 key = null; keyStr = ""; pwd = "";//Clear sensitive data
