@@ -188,14 +188,15 @@ class Encryption {
      * Generate a key from a given seed
      * @return Key generated
      */
-    static SecretKey generateKey() {
+    static SecretKeySpec generateKey() {
         // Generate a 256-bit key
         final int outputKeyLength = 256;
         SecureRandom secureRandom = new SecureRandom();
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
             keyGenerator.init(outputKeyLength, secureRandom);
-            return keyGenerator.generateKey();
+            SecretKeySpec key = (SecretKeySpec) keyGenerator.generateKey();
+            return key;
         } catch (NoSuchAlgorithmException e) {
             Log.e("CT: cannot gen key", Log.getStackTraceString(e));
             return null;

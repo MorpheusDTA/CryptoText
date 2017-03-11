@@ -4,12 +4,17 @@
     tools:context="com.example.utilisateur.cryptotext.EnterPassword">
     <item
         android:id="@+id/seeKeys"
-        android:orderInCategory="100"
+        android:orderInCategory="30"
         android:title="@string/seeKeysOption"
         app:showAsAction="never" />
     <item
         android:id="@+id/changePassword"
-        android:orderInCategory="100"
+        android:orderInCategory="20"
         android:title="@string/changePwdOption"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/update"
+        android:orderInCategory="10"
+        android:title="@string/updateConversations"
         app:showAsAction="never" />
 </menu>

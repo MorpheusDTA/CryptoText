@@ -13,11 +13,12 @@
     <string name="conversation">Conversation</string>
     <string name="seeKeysOption">See All Keys</string>
     <string name="changePwdOption">Change The KeyStore Password</string>
+    <string name="updateConversations">Update the Conversations List</string>
     <!-- ModifyConversation class/xml -->
     <string name="warnings">Warnings</string>
     <string name="tooLong">The SMS is too long. Please make it shorter.</string>
     <string name="invalidDataPwd">Incorrect password</string>
-    <string name="invalidDataKey">Key is 45 char finishing with \'=\'</string>
+    <string name="invalidDataKey">Key is 44 char finishing with \'=\'</string>
     <string name="keyOverW">The current key will be overwritten</string>
     <string name="overwrite">Overwrite it</string>
     <string name="goBack">Go Back</string>

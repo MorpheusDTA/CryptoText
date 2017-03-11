@@ -21,6 +21,7 @@ import android.widget.TextView;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import static com.example.utilisateur.cryptotext.Constants.KEY_LENGTH;
 import static com.example.utilisateur.cryptotext.Constants.PASSWORD;
 import static com.example.utilisateur.cryptotext.Constants.PHONE;
 
@@ -30,7 +31,6 @@ import static com.example.utilisateur.cryptotext.Constants.PHONE;
  */
 public class ModifyConversation extends AppCompatActivity {
     private String phoneNumber;
-    private static final int KEY_LENGTH = 45;
     private static SecretKey key = null;
     private static String keyStr = "";
 
@@ -79,6 +79,7 @@ public class ModifyConversation extends AppCompatActivity {
                  pwdField = ((EditText) findViewById(R.id.pwdField)).getText(),
                  keyField = ((EditText) findViewById(R.id.keyField)).getText();
         keyStr = keyField.toString(); String pwd = pwdField.toString(); phoneNumber = formatNumber(phoneField.toString());
+        keyStr = keyStr.substring(0, keyStr.indexOf("=") + 1);
         if (phoneNumber == null) {
             EditText phField = (EditText) findViewById(R.id.phoneField);
             phField.setTextColor(Color.RED);
@@ -94,20 +95,19 @@ public class ModifyConversation extends AppCompatActivity {
             intent.putExtra(PASSWORD, pwd);
             key = null; keyStr = "";//Clear sensitive data
             startActivity(intent);
+            return;
         }
 
         // Save the key
         Context context = getApplication();
-        if (!keyStr.isEmpty()) {//A key is to be saved
-            if (key == null) {// The key is to be generated first from the string
-                byte[] keyByte = Base64.decode(keyStr, Base64.DEFAULT);
-                key = new SecretKeySpec(keyByte, 0, 256, "AES");
-            }
-            if (Encryption.isStocked(context, phoneNumber, pwd)) {//Check if key will be overwritten
-                createAlertDialog(this, pwd); return;
-            } else {
-                Encryption.saveKey(context, key, pwd, phoneNumber);//Save Key
-            }
+        if (key == null) {
+            byte[] keyByte = Base64.decode(keyStr, Base64.DEFAULT);
+            key = new SecretKeySpec(keyByte, 0, keyByte.length, "AES");
+        }
+        if (Encryption.isStocked(context, phoneNumber, pwd)) {//Check if key will be overwritten
+            createAlertDialog(this, pwd); return;
+        } else {
+            Encryption.saveKey(context, key, pwd, phoneNumber);//Save Key
         }
 
         Intent intent = new Intent(this, Conversation.class);
@@ -123,10 +123,11 @@ public class ModifyConversation extends AppCompatActivity {
      */
     public void createKey(View view) {
         TextView keyField = (TextView) findViewById(R.id.keyField);
-
         key = Encryption.generateKey();
         if (key != null) {
             keyStr = Base64.encodeToString(key.getEncoded(), Base64.DEFAULT);
+            keyStr = keyStr.substring(0, keyStr.indexOf("=") + 1);
+            keyField.setTextColor(Color.BLACK);
             keyField.setText(keyStr);
         }
     }
@@ -144,11 +145,11 @@ public class ModifyConversation extends AppCompatActivity {
         }
         int lg = keyStr.length();
         boolean endsWith = keyStr.endsWith("=");
-        if (key == null && !(lg == KEY_LENGTH && endsWith) && !keyStr.isEmpty()) {
+        if ( !(lg == KEY_LENGTH && endsWith) && !keyStr.isEmpty() ) {
             // String was not created, to be checked : right end and right length
-            TextView eKeyField = (TextView) findViewById(R.id.keyField);
-            eKeyField.setTextColor(Color.RED);
-            eKeyField.setText(R.string.invalidDataKey);
+            TextView keyField = (TextView) findViewById(R.id.keyField);
+            keyField.setTextColor(Color.RED);
+            keyField.setText(R.string.invalidDataKey);
             return true;
         }
         return false;
@@ -169,7 +170,7 @@ public class ModifyConversation extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
                 Encryption.deleteKey(getApplication(), phoneNumber, pwd);
-                Encryption.saveKey(getApplication(), key, pwd, phoneNumber);//Save reception key
+                Encryption.saveKey(getApplication(), key, pwd, phoneNumber);//Save key
                 Intent intent = new Intent(context, Conversation.class);
                 intent.putExtra(PHONE, phoneNumber);
                 intent.putExtra(PASSWORD, pwd);

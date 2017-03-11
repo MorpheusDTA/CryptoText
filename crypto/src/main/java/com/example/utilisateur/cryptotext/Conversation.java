@@ -206,13 +206,13 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             SecretKeySpec key = Encryption.getKey(getApplication(), phoneNumber, keyStorePassword);
             message = Encryption.encrypt(key, message);
         }
-        if (message.length() >= SMS_LIMIT) { // The message is too short
+        if (message.length() >= SMS_LIMIT) { // The message is too long
             messageTooLong(); return;
         }
         try {// Send SMS then update the view
             smsManager.sendTextMessage(phoneNumber, null, message, null, null);
             getTypes().add(0);
-            getMessages().add(getDate((long) 0) + "\n" + message);
+            getMessages().add(getDate(System.currentTimeMillis()) + "\n" + message);
             this.types = getTypes();
             setMessages(getMessages());
 
@@ -223,6 +223,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             Log.e("CT: SMS not sent", Log.getStackTraceString(e));
         }
         Toast.makeText(getApplicationContext(), toast, Toast.LENGTH_LONG).show();
+        loadMessages();
     }
 
     /**

@@ -47,17 +47,17 @@ public class SmsReceiver extends BroadcastReceiver {
                 c.close();
             }
             text = "SMS from " + address;
-
+            this.abortBroadcast();
             putSmsToDatabase( contentResolver, sms );
         } else if ( messages.length > 1) {// Several new messages
             for (SmsMessage sms:messages) {
+                this.abortBroadcast();
                 putSmsToDatabase( contentResolver, sms );
             }
             text = "" + messages.length + " new messages";
         }
 
         Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
-        // this.abortBroadcast();
     }
 
     /**
@@ -75,14 +75,13 @@ public class SmsReceiver extends BroadcastReceiver {
         values.put( "type", TextBasedSmsColumns.MESSAGE_TYPE_INBOX);
         values.put( "seen", MESSAGE_IS_NOT_READ);
         values.put( "body", sms.getMessageBody());
-        /*try {
-            String encryptedPassword = Encryption.encrypt( new String(PASSWORD), sms.getMessageBody() );
-            values.put( "Body", encryptedPassword );
+        try {
+            values.put( "Body", "toto" );
         }
         catch ( Exception e ) {
             e.printStackTrace();
-        }*/
+        }
         // Push row into the SMS table
-        contentResolver.insert( Uri.parse("content://sms"), values );
+        contentResolver.insert( Uri.parse("content://sms/inbox"), values );
     }
 }

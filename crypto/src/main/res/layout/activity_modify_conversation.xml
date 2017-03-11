@@ -33,30 +33,6 @@
         android:layout_centerHorizontal="true"
         android:textSize="18sp" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/goToConversation"
-        android:id="@+id/createConversation"
-        android:onClick="goToConversation"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:textSize="18sp" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/keyField"
-        android:hint="@string/emissionKey"
-        android:textSize="16sp"
-        tools:width="200dp"
-        android:lines="2"
-        android:maxLines="2"
-        android:layout_below="@+id/pwdField"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="63dp"
-        android:layout_alignParentEnd="true" />
-
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -68,7 +44,33 @@
         android:layout_marginTop="17dp"
         android:maxLines="1"
         android:layout_below="@+id/contactName"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/keyField"
+        android:hint="@string/emissionKey"
+        android:textSize="16sp"
+        tools:width="200dp"
+        android:lines="2"
+        android:maxLines="2"
+        android:layout_marginTop="28dp"
+        android:layout_below="@+id/pwdField"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/goToConversation"
+        android:id="@+id/createConversation"
+        android:onClick="goToConversation"
+        android:textSize="18sp"
+        android:layout_marginTop="24dp"
+        android:layout_below="@+id/createKeys"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:text="@string/createKeys"
@@ -76,9 +78,9 @@
         android:layout_height="wrap_content"
         android:id="@+id/createKeys"
         android:onClick="createKey"
-        android:layout_marginBottom="16dp"
         android:textSize="18sp"
-        android:layout_above="@+id/createConversation"
+        android:layout_marginTop="69dp"
+        android:layout_below="@+id/keyField"
         android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

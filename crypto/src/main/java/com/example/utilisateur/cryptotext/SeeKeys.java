@@ -69,7 +69,6 @@ public class SeeKeys extends AppCompatActivity implements AdapterView.OnItemLong
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, keysList);
         keysListView.setAdapter(adapter);
         keysListView.setOnItemLongClickListener(this);
-        pwd = "";
     }
 
     @Override

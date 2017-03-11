@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(null);
         setContentView(R.layout.activity_main);
         if (savedInstanceState != null) update();
         update();
@@ -98,6 +98,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 intent = new Intent(this, ChangePassword.class);
                 startActivity(intent);
                 break;
+            case R.id.update:
+                update();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -114,15 +117,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         // Get the messages with the address/seen/body fields
         ContentResolver contentResolver = getContentResolver();
-        Cursor cursor = contentResolver.query(Uri.parse("content://sms/"), new String[]{"address", "seen", "body"}, null, null, null);
+        Cursor cursor = contentResolver.query(Uri.parse("content://sms/"), new String[]{"address", "read", "body", "type"}, null, null, null);
         if (cursor == null) {
             Log.d("CT: null cursor get SMS", "");
             return;
         }
         // Indexes of the fields
         int indexAddress = cursor.getColumnIndex("address");
-        int indexSeen = cursor.getColumnIndex("seen");
-
+        int indexSeen = cursor.getColumnIndex("read");
 
         boolean nextCursor = cursor.moveToFirst();
         if ( cursor.getColumnIndex( "body" ) < 0 || !nextCursor ) return;
