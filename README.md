@@ -1,9 +1,9 @@
 # CryptoText
 
-     !!!!!     WARNING     !!!!!
-   This project is an engineering school project, it should not be used for professional
-purposes where encryption is necesary. This should not be considered as a fully-secure app
-meeting with high security standards.
+        !!!!!     WARNING     !!!!!
+        This project is an engineering school project, it should not be used for professional
+    purposes where encryption is necesary. This should not be considered as a fully-secure app
+    meeting with high security standards.
 
    This is an Android app project to develop an app that enable users to communicate using 
 encrypted text messages. The aim is to encrypt the SMS using AES-CBC-256 and to share the keys
