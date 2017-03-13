@@ -1,18 +1,23 @@
 package com.example.utilisateur.cryptotext;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.Telephony;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
+import android.telephony.SmsMessage;
 import android.text.Editable;
 import android.util.Log;
 import android.view.View;
@@ -48,6 +53,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
     private ArrayList<Integer> types = new ArrayList<>();
     private ArrayList<String> messages = new ArrayList<>();
     private ArrayList<Integer> decrypted = new ArrayList<>();
+    private BroadcastReceiver smsReceiver;
 
     private ArrayList<String> getMessages() {
         return this.messages;
@@ -171,7 +177,45 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         }
 
         if (contact != null) contact.setText(contactName + "/" + phoneNumber);
+
+        IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
+        smsReceiver = new BroadcastReceiver() {
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                SmsMessage[] messages = Telephony.Sms.Intents.getMessagesFromIntent(intent);
+                for (SmsMessage sms : messages) {
+                    if (sms.getOriginatingAddress().equals(phoneNumber)) loadMessages();
+                }
+            }
+        };
+        registerReceiver(smsReceiver, intentFilter);
+
+
+
         loadMessages(); // Load the messages into the list
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
+        smsReceiver = new BroadcastReceiver() {
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                SmsMessage[] messages = Telephony.Sms.Intents.getMessagesFromIntent(intent);
+                for (SmsMessage sms : messages) {
+                    if (sms.getOriginatingAddress().equals(phoneNumber)) loadMessages();
+                }
+            }
+        };
+        registerReceiver(smsReceiver, intentFilter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause(); unregisterReceiver(smsReceiver);
     }
 
     /**

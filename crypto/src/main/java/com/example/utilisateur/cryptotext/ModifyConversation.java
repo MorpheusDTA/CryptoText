@@ -96,8 +96,7 @@ public class ModifyConversation extends AppCompatActivity {
         keyStr = keyStr.substring(0, keyStr.indexOf("=") + 1);
         if (phoneNumber == null) {
             EditText phField = (EditText) findViewById(R.id.phoneField);
-            phField.setTextColor(Color.RED);
-            phField.setText(R.string.wrongNumber);
+            phField.setHint(R.string.wrongNumber);
             return;
         }
         pwdField.clear(); keyField.clear();

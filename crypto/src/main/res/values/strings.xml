@@ -4,7 +4,7 @@
     <string name="titleActivityConversation">Conversation</string>
     <!-- EnterPassword class/xml -->
     <string name="nullPwd">Password Fields can not be empty</string>
-    <string name="noMatchPassword">Passwords do not match or are too short. Please Confirm again.</string>
+    <string name="noMatchPassword">Passwords do not match or are too short. Please Try again.</string>
     <string name="enterPassword">Enter password</string>
     <string name="confirmPassword">Confirm Password</string>
     <string name="saveChanges">Save Changes</string>
