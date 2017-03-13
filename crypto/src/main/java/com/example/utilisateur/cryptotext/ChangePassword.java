@@ -32,17 +32,19 @@ public class ChangePassword extends AppCompatActivity {
                  newPwdConfField = ((EditText) findViewById(R.id.newPwdConf)).getText();
         String oldPwd = oldPwdField.toString(), newPwd = newPwdField.toString(),
                 newPwdConf = newPwdConfField.toString();
-        if(!Encryption.testPassword(getApplication(), oldPwd)){//If the old password is not correct
+        if(!Encryption.testPassword(getApplication(), oldPwd) && info != null){//If the old password is not correct
             info.setTextColor(Color.RED);
             info.setText(R.string.wrongOldPwd);
             return;
         }
         if(!newPwd.equals(newPwdConf)) {// If new passwords do not match
-            info.setTextColor(Color.RED);
-            info.setText(R.string.pwdNoMatch);
+            if (info != null) {
+                info.setTextColor(Color.RED);
+                info.setText(R.string.pwdNoMatch);
+            }
             return;
         }
-        if (!Encryption.changePwd(getApplication(), oldPwd, newPwd)) {
+        if (!Encryption.changePwd(getApplication(), oldPwd, newPwd) && info != null) {
             info.setTextColor(Color.RED);
             info.setText(R.string.changeFailed);
         }

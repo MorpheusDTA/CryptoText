@@ -33,7 +33,7 @@ public class EnterPassword extends AppCompatActivity {
         pwd.clear();
         pwdConfirmation.clear();
 
-        if (pwdStr.isEmpty() || pwdConfirmationStr.isEmpty()){
+        if ((pwdStr.isEmpty() || pwdConfirmationStr.isEmpty()) && info != null){
             info.setTextColor(Color.RED);
             info.setText(R.string.nullPwd);
         }
@@ -42,7 +42,7 @@ public class EnterPassword extends AppCompatActivity {
             Encryption.createKeyStore(getApplication(), pwdStr);
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
-        } else {
+        } else if (info != null){
             info.setTextColor(Color.RED);
             info.setText(R.string.noMatchPassword);
         }

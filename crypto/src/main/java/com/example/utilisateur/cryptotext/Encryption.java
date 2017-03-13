@@ -195,8 +195,7 @@ class Encryption {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
             keyGenerator.init(outputKeyLength, secureRandom);
-            SecretKeySpec key = (SecretKeySpec) keyGenerator.generateKey();
-            return key;
+            return (SecretKeySpec) keyGenerator.generateKey();
         } catch (NoSuchAlgorithmException e) {
             Log.e("CT: cannot gen key", Log.getStackTraceString(e));
             return null;

@@ -51,19 +51,33 @@ public class ModifyConversation extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        EditText pwdField = (EditText) findViewById(R.id.pwdField),
+                 keyField = (EditText) findViewById(R.id.keyField);
+        if (keyField != null) keyField.setText("");
+        if (pwdField != null) {
+            pwdField.clearComposingText();
+            pwdField.setHint(R.string.keyPassword);
+        }
+    }
+
     /**
      * Sets the phone and contact fields with the adequate values
      */
     private void setPhoneAndContact(){
         TextView contact = (TextView) findViewById(R.id.contactName);
         EditText phone = (EditText) findViewById(R.id.phoneField);
-        phone.setText(phoneNumber);
-        phone.setEnabled(false);
+        if (phone != null) {
+            phone.setText(phoneNumber);
+            phone.setEnabled(false);
+        }
 
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
         Cursor cursor = getContentResolver().query(uri, new String[]{ContactsContract.Data.DISPLAY_NAME}, null, null, null);
         if (cursor != null) {
-            if (cursor.moveToFirst()) {
+            if (cursor.moveToFirst() && contact != null) {
                 contact.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME)));
             }
             cursor.close();
@@ -127,8 +141,10 @@ public class ModifyConversation extends AppCompatActivity {
         if (key != null) {
             keyStr = Base64.encodeToString(key.getEncoded(), Base64.DEFAULT);
             keyStr = keyStr.substring(0, keyStr.indexOf("=") + 1);
-            keyField.setTextColor(Color.BLACK);
-            keyField.setText(keyStr);
+            if (keyField != null) {
+                keyField.setTextColor(Color.BLACK);
+                keyField.setText(keyStr);
+            }
         }
     }
 

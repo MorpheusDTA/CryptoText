@@ -62,7 +62,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(null);
         setContentView(R.layout.activity_main);
-        if (savedInstanceState != null) update();
+        //if (savedInstanceState != null) update();
+        update();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         update();
     }
 
@@ -97,9 +103,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             case R.id.changePassword:
                 intent = new Intent(this, ChangePassword.class);
                 startActivity(intent);
-                break;
-            case R.id.update:
-                update();
                 break;
         }
         return super.onOptionsItemSelected(item);

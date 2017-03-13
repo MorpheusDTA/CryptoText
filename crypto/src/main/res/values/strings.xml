@@ -13,7 +13,6 @@
     <string name="conversation">Conversation</string>
     <string name="seeKeysOption">See All Keys</string>
     <string name="changePwdOption">Change The KeyStore Password</string>
-    <string name="updateConversations">Update the Conversations List</string>
     <!-- ModifyConversation class/xml -->
     <string name="warnings">Warnings</string>
     <string name="tooLong">The SMS is too long. Please make it shorter.</string>

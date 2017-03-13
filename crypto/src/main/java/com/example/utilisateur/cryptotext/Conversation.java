@@ -156,7 +156,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             keyStorePassword = (String) savedInstanceState.getSerializable(PASSWORD);
         }
         // Manage the encryption checkbox
-        if (!Encryption.isStocked(getApplication(), phoneNumber, keyStorePassword)) {
+        if (!Encryption.isStocked(getApplication(), phoneNumber, keyStorePassword) && checkEncryption != null) {
             checkEncryption.setChecked(false);
             checkEncryption.setEnabled(false);
         }
@@ -170,7 +170,7 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
             cursor.close();
         }
 
-        contact.setText(contactName + "/" + phoneNumber);
+        if (contact != null) contact.setText(contactName + "/" + phoneNumber);
         loadMessages(); // Load the messages into the list
     }
 

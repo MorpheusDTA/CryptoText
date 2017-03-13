@@ -1,5 +1,7 @@
 package com.example.utilisateur.cryptotext;
 
+import android.util.Log;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,10 +13,15 @@ class CountryToPhonePrefix {
 
     private static Map<String, String> map = new HashMap<>();
 
+    /**
+     *This functions returns the phone prefix for a country according to a given ISO country code
+     * @param iso2CountryCode ISO code for the country
+     * @return Phone prefix for the country
+     */
     static String prefixFor(String iso2CountryCode) {
         String result = map.get(iso2CountryCode);
         if (result == null) {
-            throw new IllegalArgumentException("Unknown country code " + iso2CountryCode);
+            Log.d("CT: Unk. country code", "Unknown country code for ISO " + iso2CountryCode);
         }
         return result;
     }
