@@ -23,6 +23,9 @@ public class EnterPassword extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_password);
         if (Encryption.exists(getApplication())){
+            findViewById(R.id.saveChanges).setEnabled(false);
+            findViewById(R.id.pwd).setEnabled(false);
+            findViewById(R.id.pwdConf).setEnabled(false);
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         }
