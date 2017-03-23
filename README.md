@@ -1,7 +1,7 @@
 # CryptoText
 
         !!!!!     WARNING     !!!!!
-        This project is an engineering school project, it should not be used for professional
+        This project is an engineering school project at ENSTA Bretagne, it should not be used for professional
     purposes where encryption is necesary. This should not be considered as a fully-secure app
     meeting with high security standards.
 
