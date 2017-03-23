@@ -178,39 +178,14 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
 
         if (contact != null) contact.setText(contactName + "/" + phoneNumber);
 
-        IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
-        smsReceiver = new BroadcastReceiver() {
-
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                SmsMessage[] messages = Telephony.Sms.Intents.getMessagesFromIntent(intent);
-                for (SmsMessage sms : messages) {
-                    if (sms.getOriginatingAddress().equals(phoneNumber)) loadMessages();
-                }
-            }
-        };
-        registerReceiver(smsReceiver, intentFilter);
-
-
-
+        createReceiver();
         loadMessages(); // Load the messages into the list
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
-        smsReceiver = new BroadcastReceiver() {
-
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                SmsMessage[] messages = Telephony.Sms.Intents.getMessagesFromIntent(intent);
-                for (SmsMessage sms : messages) {
-                    if (sms.getOriginatingAddress().equals(phoneNumber)) loadMessages();
-                }
-            }
-        };
-        registerReceiver(smsReceiver, intentFilter);
+        createReceiver();
     }
 
     @Override
@@ -353,6 +328,27 @@ public class Conversation extends AppCompatActivity implements AdapterView.OnIte
         String month = new DateFormatSymbols().getMonths()[calendar.get(Calendar.MONTH)];
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
-        return month + " " + date + " " + year + " " + hour + ":" + minute;
+        String min = "" + minute;
+        if (minute < 10) min = "0" + min;
+        return month + " " + date + " " + year + " " + hour + ":" + min;
+    }
+
+    /**
+     * Creates the smsReceiver to update the view
+     */
+    private void createReceiver() {
+        IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
+        intentFilter.setPriority(1000);
+        smsReceiver = new BroadcastReceiver() {
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                SmsMessage[] messages = Telephony.Sms.Intents.getMessagesFromIntent(intent);
+                for (SmsMessage sms : messages) {
+                    if (sms.getOriginatingAddress().equals(phoneNumber)) loadMessages();
+                }
+            }
+        };
+        registerReceiver(smsReceiver, intentFilter);
     }
 }

@@ -40,7 +40,7 @@
         <activity android:name=".ModifyConversation" />
         <activity android:name=".MainActivity" />
         <activity android:name=".SeeKeys" />
-        <activity android:name=".ChangePassword"></activity>
+        <activity android:name=".ChangePassword"/>
     </application>
 
 </manifest>

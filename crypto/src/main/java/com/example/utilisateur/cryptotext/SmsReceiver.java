@@ -16,6 +16,7 @@ import android.provider.Telephony.TextBasedSmsColumns;
 import static com.example.utilisateur.cryptotext.Constants.MESSAGE_IS_NOT_READ;
 
 /**
+ * Class that receives all SMSs
  * @author DonatienTERTRAIS
  */
 public class SmsReceiver extends BroadcastReceiver {
@@ -47,11 +48,9 @@ public class SmsReceiver extends BroadcastReceiver {
                 c.close();
             }
             text = "SMS from " + address;
-            this.abortBroadcast();
             putSmsToDatabase( contentResolver, sms );
         } else if ( messages.length > 1) {// Several new messages
             for (SmsMessage sms:messages) {
-                this.abortBroadcast();
                 putSmsToDatabase( contentResolver, sms );
             }
             text = "" + messages.length + " new messages";

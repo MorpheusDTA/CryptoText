@@ -1,0 +1,124 @@
+-- Merging decision tree log ---
+manifest
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:2:1-46:12
+	package
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:3:5-49
+		INJECTED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml
+	android:versionName
+		INJECTED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml
+	xmlns:android
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:2:11-69
+	android:versionCode
+		INJECTED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml
+uses-permission#android.permission.SEND_SMS
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:5:5-67
+	android:name
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:5:22-64
+uses-permission#android.permission.WRITE_SMS
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:6:5-68
+	android:name
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:6:22-65
+uses-permission#android.permission.READ_SMS
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:7:5-67
+	android:name
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:7:22-64
+uses-permission#android.permission.RECEIVE_SMS
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:8:5-70
+	android:name
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:8:22-67
+uses-permission#android.permission.READ_CONTACTS
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:9:5-72
+	android:name
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:9:22-69
+application
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:11:5-44:19
+MERGED from [com.android.support:design:23.4.0] C:\Users\Jean\.android\build-cache\3ed5841454904d251632634464464651b4917680\output\AndroidManifest.xml:22:5-20
+MERGED from [com.android.support:appcompat-v7:23.4.0] C:\Users\Jean\.android\build-cache\a4bef78cfe2a4e27f8c450e1ea08352e938ea8dd\output\AndroidManifest.xml:25:5-20
+MERGED from [com.android.support:animated-vector-drawable:23.4.0] C:\Users\Jean\.android\build-cache\7b224cba2975d7de140e0f21863aa973c0347e28\output\AndroidManifest.xml:7:5-20
+MERGED from [com.android.support:support-vector-drawable:23.4.0] C:\Users\Jean\.android\build-cache\eeec6348868e7d7b81f374bcb567727b2f8a814f\output\AndroidManifest.xml:7:5-20
+MERGED from [com.android.support:support-v4:23.4.0] C:\Users\Jean\.android\build-cache\537a0a8211e45343358de4ffce445292d343cafb\output\AndroidManifest.xml:22:5-20
+	android:label
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:14:9-40
+	android:supportsRtl
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:15:9-35
+	android:allowBackup
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:12:9-35
+	android:icon
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:13:9-43
+	android:theme
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:16:9-40
+activity#com.example.utilisateur.cryptotext.EnterPassword
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:17:9-26:20
+	android:label
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:19:13-44
+	android:theme
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:20:13-56
+	android:name
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:18:13-42
+intent-filter#android.intent.action.MAIN+android.intent.category.LAUNCHER
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:21:13-25:29
+action#android.intent.action.MAIN
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:22:17-69
+	android:name
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:22:25-66
+category#android.intent.category.LAUNCHER
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:24:17-77
+	android:name
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:24:27-74
+receiver#com.example.utilisateur.cryptotext.SmsReceiver
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:28:9-34:20
+	android:exported
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:30:13-36
+	android:name
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:29:13-40
+intent-filter#android.provider.Telephony.SMS_RECEIVED
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:31:13-33:29
+	android:priority
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:31:28-51
+action#android.provider.Telephony.SMS_RECEIVED
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:32:17-82
+	android:name
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:32:25-79
+activity#com.example.utilisateur.cryptotext.Conversation
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:36:9-39:59
+	android:label
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:38:13-62
+	android:theme
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:39:13-56
+	android:name
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:37:13-41
+activity#com.example.utilisateur.cryptotext.ModifyConversation
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:40:9-56
+	android:name
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:40:19-53
+activity#com.example.utilisateur.cryptotext.MainActivity
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:41:9-50
+	android:name
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:41:19-47
+activity#com.example.utilisateur.cryptotext.SeeKeys
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:42:9-45
+	android:name
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:42:19-42
+activity#com.example.utilisateur.cryptotext.ChangePassword
+ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:43:9-51
+	android:name
+		ADDED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml:43:19-49
+uses-sdk
+INJECTED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml reason: use-sdk injection requested
+MERGED from [com.android.support:design:23.4.0] C:\Users\Jean\.android\build-cache\3ed5841454904d251632634464464651b4917680\output\AndroidManifest.xml:20:5-43
+MERGED from [com.android.support:recyclerview-v7:23.4.0] C:\Users\Jean\.android\build-cache\6c75438b7fef08c23a827e8a25dd7b8b13f23149\output\AndroidManifest.xml:20:5-43
+MERGED from [com.android.support:appcompat-v7:23.4.0] C:\Users\Jean\.android\build-cache\a4bef78cfe2a4e27f8c450e1ea08352e938ea8dd\output\AndroidManifest.xml:21:5-23:78
+MERGED from [com.android.support:animated-vector-drawable:23.4.0] C:\Users\Jean\.android\build-cache\7b224cba2975d7de140e0f21863aa973c0347e28\output\AndroidManifest.xml:5:5-44
+MERGED from [com.android.support:support-vector-drawable:23.4.0] C:\Users\Jean\.android\build-cache\eeec6348868e7d7b81f374bcb567727b2f8a814f\output\AndroidManifest.xml:5:5-43
+MERGED from [com.android.support:support-v4:23.4.0] C:\Users\Jean\.android\build-cache\537a0a8211e45343358de4ffce445292d343cafb\output\AndroidManifest.xml:20:5-43
+	tools:overrideLibrary
+		ADDED from [com.android.support:appcompat-v7:23.4.0] C:\Users\Jean\.android\build-cache\a4bef78cfe2a4e27f8c450e1ea08352e938ea8dd\output\AndroidManifest.xml:23:9-75
+	android:targetSdkVersion
+		INJECTED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\Jean\Desktop\Donatien\Programmes\CryptoText\crypto\src\main\AndroidManifest.xml
